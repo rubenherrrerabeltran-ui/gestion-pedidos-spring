@@ -9,12 +9,10 @@
         <h1 th:text="${usuario.idUsuario == null} ? 'Nuevo usuario' : 'Editar usuario #' + ${usuario.idUsuario}">Usuario</h1>
         <form class="formulario" method="post" th:action="@{/usuarios/guardar}" th:object="${usuario}" autocomplete="off">
             <input type="hidden" th:field="*{idUsuario}">
-            <label for="nombre">Nombre completo</label>
-            <input type="text" th:field="*{nombre}" required maxlength="100">
-            <label for="correo">Correo electrónico</label>
-            <input type="email" th:field="*{correo}" required maxlength="150">
+            <th:block th:replace="~{fragmentos :: camposPersona}"></th:block>
             <label for="clave" th:text="${usuario.idUsuario == null} ? 'Contraseña' : 'Nueva contraseña (vacío = no cambiar)'">Contraseña</label>
-            <input type="password" th:field="*{clave}" th:required="${usuario.idUsuario == null}" minlength="8">
+            <input type="password" th:field="*{clave}" th:required="${usuario.idUsuario == null}" minlength="8" maxlength="64"
+                   title="8 a 64 caracteres con al menos una letra y un número">
             <label for="rol">Rol</label>
             <select th:field="*{rol}">
                 <option th:each="r : ${roles}" th:value="${r}" th:text="${r}">ROL</option>

@@ -47,8 +47,8 @@ class UsuarioServicioTest {
     @Test
     @DisplayName("Registra un usuario guardando el hash, nunca la contraseña")
     void registraConHash() {
-        Usuario usuario = usuarioServicio.guardar(null, "Ana Torres", "Ana.Torres@Correo.com", "Segura2026*",
-                Rol.VENDEDOR);
+        Usuario usuario = usuarioServicio.guardar(null, new DatosUsuario("Ana Torres", "1020304050",
+                "Ana.Torres@Correo.com", "3201112233", "Segura2026*", Rol.VENDEDOR));
         assertEquals("ana.torres@correo.com", usuario.getCorreo());
         assertTrue(usuario.getPasswordHash().startsWith("pbkdf2$"));
         assertFalse(usuario.getPasswordHash().contains("Segura2026*"));
@@ -60,10 +60,11 @@ class UsuarioServicioTest {
     @DisplayName("No permite correos repetidos ni contraseñas cortas")
     void validaCorreoYClave() {
         assertThrows(NegocioException.class,
-                () -> usuarioServicio.guardar(null, "Otro admin", "admin@gestionpedidos.local", "Clave2026*",
-                        Rol.CLIENTE));
+                () -> usuarioServicio.guardar(null, new DatosUsuario("Otro Admin", "1099887766",
+                        "admin@gestionpedidos.local", "3001112233", "Clave2026*", Rol.CLIENTE)));
         assertThrows(NegocioException.class,
-                () -> usuarioServicio.guardar(null, "Pedro", "pedro@correo.com", "123", Rol.CLIENTE));
+                () -> usuarioServicio.guardar(null, new DatosUsuario("Pedro Gil", "1099887766",
+                        "pedro@correo.com", "3001112233", "123", Rol.CLIENTE)));
     }
 
     @Test

@@ -40,6 +40,30 @@
     <div class="alerta alerta-error" th:if="${error != null}" th:text="${error}">Error</div>
 </th:block>
 
+<!--/* Campos de datos personales compartidos por el registro de clientes y el formulario de usuarios.
+     Se insertan dentro de un formulario con th:object; los atributos HTML5 son la primera validación
+     (en el navegador) y el Validador del servidor es la segunda. */-->
+<th:block th:fragment="camposPersona">
+    <label for="nombre">Nombre completo</label>
+    <input type="text" th:field="*{nombre}" required minlength="3" maxlength="100"
+           pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ][A-Za-zÁÉÍÓÚÜÑáéíóúüñ .'\-]*"
+           title="Solo letras, espacios, apóstrofo y guion" placeholder="Ej.: María José Pérez">
+    <div class="fila">
+        <div>
+            <label for="documento">Documento de identidad</label>
+            <input type="text" th:field="*{documento}" required inputmode="numeric" maxlength="10"
+                   pattern="\d{6,10}" title="Entre 6 y 10 dígitos, sin puntos" placeholder="Ej.: 1032456789">
+        </div>
+        <div>
+            <label for="telefono">Teléfono</label>
+            <input type="tel" th:field="*{telefono}" required inputmode="numeric" maxlength="10"
+                   pattern="[36]\d{9}" title="10 dígitos; inicia en 3 (celular) o 6 (fijo)" placeholder="Ej.: 3001234567">
+        </div>
+    </div>
+    <label for="correo">Correo electrónico</label>
+    <input type="email" th:field="*{correo}" required maxlength="150" placeholder="usuario@correo.com">
+</th:block>
+
 <footer class="pie" th:fragment="pie">
     <span>SENA · Análisis y Desarrollo de Software · Ficha 3186691 · Rubén Darío Herrera Beltrán</span>
     <span th:text="'Spring Boot ' + ${versionSpringBoot} + ' · Thymeleaf · MySQL'">Spring Boot</span>

@@ -6,12 +6,12 @@
 --   laura.vendedora@gestionpedidos.local  / Vendedor2026*  (VENDEDOR)
 --   carlos.cliente@gestionpedidos.local   / Cliente2026*   (CLIENTE)
 -- ============================================================================
-INSERT IGNORE INTO usuario (id_usuario, nombre, correo, password_hash, rol) VALUES
-  (1, 'Administrador del sistema', 'admin@gestionpedidos.local',
+INSERT IGNORE INTO usuario (id_usuario, nombre, documento, correo, telefono, password_hash, rol) VALUES
+  (1, 'Administrador del sistema', '1032456789', 'admin@gestionpedidos.local', '3001234567',
    'pbkdf2$120000$1ddwVi2xLeTUNIqPdHnQAQ==$n/KPxngLX5nteR/5s/4psSG21ooP5bB7GGi3OhemcBE=', 'ADMINISTRADOR'),
-  (2, 'Laura Gómez', 'laura.vendedora@gestionpedidos.local',
+  (2, 'Laura Gómez', '52987654', 'laura.vendedora@gestionpedidos.local', '3109876543',
    'pbkdf2$120000$e9TTWoIhWVUwlK3t0J3oGQ==$MBhjVH8tFR3K2K7OhFz2pIZYT+dpLHZxjUFh2VbGyUM=', 'VENDEDOR'),
-  (3, 'Carlos Ramírez', 'carlos.cliente@gestionpedidos.local',
+  (3, 'Carlos Ramírez', '80123456', 'carlos.cliente@gestionpedidos.local', '3155550101',
    'pbkdf2$120000$Wlkk7tVVliaixkqvmSqJkg==$g3DTYFZtN77CiWzRjjAYIDguj9nxqc/FfUcSd7rTiYQ=', 'CLIENTE');
 
 INSERT IGNORE INTO producto (id_producto, nombre_producto, precio, stock, activo) VALUES

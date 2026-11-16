@@ -78,35 +78,53 @@ public class UsuarioServicio {
     }
 
     /**
-     * Crea o actualiza un usuario.
+     * Crea o actualiza un usuario aplicando todas las validaciones de datos.
      *
      * @param idUsuario {@code null} para crear; el id para editar
-     * @param nombre    nombre completo
-     * @param correo    correo único
-     * @param clave     contraseña en texto plano; obligatoria al crear, opcional al editar
-     * @param rol       rol asignado
+     * @param datos     nombre, documento, correo, teléfono, contraseña y rol
      * @return el usuario guardado
+     * @throws NegocioException si algún dato no es válido o el correo o el documento ya existen
      */
     @Transactional
-    public Usuario guardar(Integer idUsuario, String nombre, String correo, String clave, Rol rol) {
+    public Usuario guardar(Integer idUsuario, DatosUsuario datos) {
         Usuario usuario = idUsuario == null ? new Usuario() : obtener(idUsuario);
-        usuario.setNombre(Validador.validarTextoObligatorio(nombre, "nombre", 100));
-        usuario.setCorreo(Validador.validarCorreo(correo));
-        if (rol == null) {
+        usuario.setNombre(Validador.validarNombrePersona(datos.nombre()));
+        usuario.setDocumento(Validador.validarDocumento(datos.documento()));
+        usuario.setCorreo(Validador.validarCorreo(datos.correo()));
+        usuario.setTelefono(Validador.validarTelefono(datos.telefono()));
+        if (datos.rol() == null) {
             throw new NegocioException("Seleccione el rol del usuario");
         }
-        usuario.setRol(rol);
+        usuario.setRol(datos.rol());
         usuarioRepositorio.buscarPorCorreo(usuario.getCorreo())
                 .filter(otro -> !otro.getIdUsuario().equals(idUsuario))
                 .ifPresent(otro -> {
                     throw new NegocioException("Ya existe un usuario con el correo " + usuario.getCorreo());
                 });
-        boolean cambiaClave = idUsuario == null || (clave != null && !clave.isEmpty());
+        usuarioRepositorio.buscarPorDocumento(usuario.getDocumento())
+                .filter(otro -> !otro.getIdUsuario().equals(idUsuario))
+                .ifPresent(otro -> {
+                    throw new NegocioException("Ya existe un usuario con el documento " + usuario.getDocumento());
+                });
+        boolean cambiaClave = idUsuario == null || (datos.clave() != null && !datos.clave().isEmpty());
         if (cambiaClave) {
-            Validador.validarClave(clave);
-            usuario.setPasswordHash(ClaveUtil.generarHash(clave));
+            Validador.validarClave(datos.clave());
+            usuario.setPasswordHash(ClaveUtil.generarHash(datos.clave()));
         }
         return usuarioRepositorio.guardar(usuario);
+    }
+
+    /**
+     * Registro público (RF02): cualquier persona crea su cuenta, siempre con el rol CLIENTE,
+     * aunque se envíe otro rol en la petición.
+     *
+     * @param datos datos del formulario de registro
+     * @return el cliente registrado
+     */
+    @Transactional
+    public Usuario registrarCliente(DatosUsuario datos) {
+        return guardar(null, new DatosUsuario(datos.nombre(), datos.documento(), datos.correo(), datos.telefono(),
+                datos.clave(), Rol.CLIENTE));
     }
 
     /**

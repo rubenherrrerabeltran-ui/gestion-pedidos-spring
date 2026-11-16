@@ -11,7 +11,9 @@ public class Usuario {
 
     private Integer idUsuario;
     private String nombre;
+    private String documento;
     private String correo;
+    private String telefono;
     private String passwordHash;
     private Rol rol;
     private LocalDateTime fechaRegistro;
@@ -48,6 +50,22 @@ public class Usuario {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public String getDocumento() {
+        return documento;
+    }
+
+    public void setDocumento(String documento) {
+        this.documento = documento;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
     }
 
     public String getCorreo() {

@@ -2,6 +2,7 @@ package co.sena.gestionpedidos.web.controlador;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -90,16 +91,21 @@ public class UsuarioControlador {
      * POST /usuarios/guardar.
      *
      * @param formulario datos enviados (la contraseña viaja en el cuerpo POST)
+     * @param enlace     errores de conversión (por ejemplo, un rol que no existe)
      * @param modelo     modelo para volver a mostrar el formulario
      * @param atributos  mensajes flash
      * @return redirección a la lista o el formulario con el error
      */
     @PostMapping("/guardar")
-    public String guardar(@ModelAttribute("usuario") UsuarioFormulario formulario, Model modelo,
-                          RedirectAttributes atributos) {
+    public String guardar(@ModelAttribute("usuario") UsuarioFormulario formulario, BindingResult enlace,
+                          Model modelo, RedirectAttributes atributos) {
+        if (enlace.hasErrors()) {
+            formulario.setClave(null);
+            modelo.addAttribute("error", "El rol seleccionado no es válido");
+            return VISTA_FORMULARIO;
+        }
         try {
-            Usuario guardado = usuarioServicio.guardar(formulario.getIdUsuario(), formulario.getNombre(),
-                    formulario.getCorreo(), formulario.getClave(), formulario.getRol());
+            Usuario guardado = usuarioServicio.guardar(formulario.getIdUsuario(), formulario.aDatos());
             atributos.addFlashAttribute("exito", "Usuario " + guardado.getCorreo() + " guardado");
             return "redirect:/usuarios";
         } catch (NegocioException e) {

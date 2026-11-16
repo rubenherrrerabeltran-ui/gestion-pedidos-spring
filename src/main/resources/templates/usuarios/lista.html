@@ -13,12 +13,14 @@
         <a class="boton boton-principal" th:href="@{/usuarios/nuevo}">+ Nuevo usuario</a>
     </section>
     <table class="tabla">
-        <thead><tr><th>ID</th><th>Nombre</th><th>Correo</th><th>Rol</th><th>Registro</th><th>Acciones</th></tr></thead>
+        <thead><tr><th>ID</th><th>Nombre</th><th>Documento</th><th>Correo</th><th>Teléfono</th><th>Rol</th><th>Registro</th><th>Acciones</th></tr></thead>
         <tbody>
         <tr th:each="u : ${usuarios}">
             <td th:text="${u.idUsuario}">1</td>
             <td th:text="${u.nombre}">Nombre</td>
+            <td th:text="${u.documento}">documento</td>
             <td th:text="${u.correo}">correo</td>
+            <td th:text="${u.telefono}">teléfono</td>
             <td><span class="rol" th:classappend="'rol-' + ${u.rol}" th:text="${u.rol}">ROL</span></td>
             <td th:text="${#temporals.format(u.fechaRegistro, 'dd/MM/yyyy')}">fecha</td>
             <td class="acciones">

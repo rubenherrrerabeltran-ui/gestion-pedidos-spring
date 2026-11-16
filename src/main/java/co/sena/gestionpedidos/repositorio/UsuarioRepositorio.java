@@ -37,7 +37,13 @@ public interface UsuarioRepositorio {
     Optional<Usuario> buscarPorCorreo(String correo);
 
     /**
-     * Inserta el usuario si no tiene id, o actualiza nombre, correo, rol y hash si ya lo tiene.
+     * @param documento número de documento (único)
+     * @return el usuario, o vacío si no existe
+     */
+    Optional<Usuario> buscarPorDocumento(String documento);
+
+    /**
+     * Inserta el usuario si no tiene id, o actualiza sus datos, rol y hash si ya lo tiene.
      *
      * @param usuario datos a guardar (con la contraseña ya convertida en hash)
      * @return el usuario con su identificador asignado

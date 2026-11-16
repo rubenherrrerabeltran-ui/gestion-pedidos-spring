@@ -17,6 +17,7 @@
             <input type="password" id="clave" name="clave" required placeholder="Mínimo 8 caracteres">
             <button type="submit" class="boton boton-principal">Ingresar</button>
         </form>
+        <p class="ayuda centrado">¿Es cliente y no tiene cuenta? <a th:href="@{/registro}">Regístrese aquí</a></p>
     </section>
 </main>
 <footer th:replace="~{fragmentos :: pie}"></footer>

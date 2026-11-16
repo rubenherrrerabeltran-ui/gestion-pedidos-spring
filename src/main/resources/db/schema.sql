@@ -4,16 +4,21 @@
 -- Origen: modelo físico GA6-220501096-AA2-EV02 y scripts de AA2-EV01/EV02.
 -- Spring Boot lo ejecuta al iniciar (spring.sql.init); IF NOT EXISTS evita
 -- errores cuando las tablas ya existen.
+-- v1.1 (AA3-EV02): documento y teléfono del usuario para el registro de
+-- clientes (requerimiento RF02 de los mockups GA6-220501096-AA3-EV02).
 -- Autor: Rubén Darío Herrera Beltrán
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS usuario (
   id_usuario     INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   nombre         VARCHAR(100) NOT NULL,
+  documento      VARCHAR(10)  NULL,
   correo         VARCHAR(150) NOT NULL,
+  telefono       VARCHAR(10)  NULL,
   password_hash  VARCHAR(255) NOT NULL,
   rol            VARCHAR(15)  NOT NULL DEFAULT 'CLIENTE',
   fecha_registro DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT uq_usuario_correo UNIQUE (correo),
+  CONSTRAINT uq_usuario_documento UNIQUE (documento),
   CONSTRAINT chk_usuario_rol CHECK (rol IN ('ADMINISTRADOR', 'VENDEDOR', 'CLIENTE'))
 ) ENGINE = InnoDB;
 

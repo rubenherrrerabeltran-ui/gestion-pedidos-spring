@@ -24,12 +24,13 @@ import co.sena.gestionpedidos.repositorio.UsuarioRepositorio;
 public class UsuarioRepositorioJdbc implements UsuarioRepositorio {
 
     private static final String COLUMNAS =
-            "SELECT id_usuario, nombre, correo, password_hash, rol, fecha_registro FROM usuario ";
+            "SELECT id_usuario, nombre, documento, correo, telefono, password_hash, rol, fecha_registro FROM usuario ";
     private static final String SQL_INSERTAR = """
-            INSERT INTO usuario (nombre, correo, password_hash, rol)
-            VALUES (:nombre, :correo, :hash, :rol)""";
+            INSERT INTO usuario (nombre, documento, correo, telefono, password_hash, rol)
+            VALUES (:nombre, :documento, :correo, :telefono, :hash, :rol)""";
     private static final String SQL_ACTUALIZAR = """
-            UPDATE usuario SET nombre = :nombre, correo = :correo, password_hash = :hash, rol = :rol
+            UPDATE usuario SET nombre = :nombre, documento = :documento, correo = :correo, telefono = :telefono,
+                   password_hash = :hash, rol = :rol
             WHERE id_usuario = :id""";
 
     private final JdbcClient jdbcClient;
@@ -75,7 +76,9 @@ public class UsuarioRepositorioJdbc implements UsuarioRepositorio {
         JdbcClient.StatementSpec sentencia = jdbcClient
                 .sql(usuario.getIdUsuario() == null ? SQL_INSERTAR : SQL_ACTUALIZAR)
                 .param("nombre", usuario.getNombre())
+                .param("documento", usuario.getDocumento())
                 .param("correo", usuario.getCorreo())
+                .param("telefono", usuario.getTelefono())
                 .param("hash", usuario.getPasswordHash())
                 .param("rol", usuario.getRol().name());
         if (usuario.getIdUsuario() == null) {
@@ -86,6 +89,14 @@ public class UsuarioRepositorioJdbc implements UsuarioRepositorio {
             sentencia.param("id", usuario.getIdUsuario()).update();
         }
         return usuario;
+    }
+
+    @Override
+    public Optional<Usuario> buscarPorDocumento(String documento) {
+        return jdbcClient.sql(COLUMNAS + "WHERE documento = :documento")
+                .param("documento", documento)
+                .query(this::mapear)
+                .optional();
     }
 
     @Override
@@ -103,7 +114,9 @@ public class UsuarioRepositorioJdbc implements UsuarioRepositorio {
         Usuario usuario = new Usuario();
         usuario.setIdUsuario(fila.getInt("id_usuario"));
         usuario.setNombre(fila.getString("nombre"));
+        usuario.setDocumento(fila.getString("documento"));
         usuario.setCorreo(fila.getString("correo"));
+        usuario.setTelefono(fila.getString("telefono"));
         usuario.setPasswordHash(fila.getString("password_hash"));
         usuario.setRol(Rol.valueOf(fila.getString("rol")));
         Timestamp fechaRegistro = fila.getTimestamp("fecha_registro");

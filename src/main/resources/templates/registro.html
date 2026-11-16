@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: cabeza('Crear cuenta')}"></head>
+<body>
+<header th:replace="~{fragmentos :: encabezado}"></header>
+<main class="contenido">
+    <th:block th:replace="~{fragmentos :: mensajes}"></th:block>
+    <section class="tarjeta-formulario centrada">
+        <h1>Crear cuenta de cliente</h1>
+        <p class="ayuda">Registre sus datos para hacer pedidos en línea. Todos los campos son obligatorios.</p>
+        <form class="formulario" method="post" th:action="@{/registro}" th:object="${cliente}" autocomplete="off">
+            <th:block th:replace="~{fragmentos :: camposPersona}"></th:block>
+            <label for="clave">Contraseña</label>
+            <input type="password" th:field="*{clave}" required minlength="8" maxlength="64"
+                   title="8 a 64 caracteres con al menos una letra y un número"
+                   placeholder="Mínimo 8 caracteres, con letras y números">
+            <div class="botones">
+                <button type="submit" class="boton boton-principal">Crear cuenta</button>
+                <a class="boton boton-claro" th:href="@{/login}">Ya tengo cuenta</a>
+            </div>
+        </form>
+    </section>
+</main>
+<footer th:replace="~{fragmentos :: pie}"></footer>
+</body>
+</html>
