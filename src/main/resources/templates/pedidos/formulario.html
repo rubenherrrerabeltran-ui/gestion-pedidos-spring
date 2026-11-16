@@ -28,7 +28,7 @@
                     <td class="num" th:text="'$ ' + ${#numbers.formatDecimal(prod.precio, 1, 'POINT', 0, 'COMMA')}">0</td>
                     <td class="num" th:text="${prod.stock}">0</td>
                     <!--/* name="cantidades[ID]": Spring lo enlaza en el mapa PedidoFormulario.cantidades */-->
-                    <td class="num"><input type="number" min="0" th:max="${prod.stock}" step="1"
+                    <td class="num"><input type="number" min="0" th:max="${prod.stock < 1000 ? prod.stock : 1000}" step="1"
                                            th:name="'cantidades[' + ${prod.idProducto} + ']'"
                                            th:value="${pedido.cantidades[prod.idProducto] != null} ? ${pedido.cantidades[prod.idProducto]} : 0"></td>
                 </tr>

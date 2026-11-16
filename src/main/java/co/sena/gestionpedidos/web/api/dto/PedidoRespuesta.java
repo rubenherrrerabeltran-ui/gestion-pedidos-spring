@@ -7,7 +7,7 @@ import java.util.List;
 import co.sena.gestionpedidos.modelo.Pedido;
 
 /**
- * Representación JSON de un pedido con su total calculado.
+ * Representación JSON de un pedido con su subtotal, IVA y total calculados.
  *
  * @param idPedido      identificador
  * @param idCliente     cliente
@@ -15,11 +15,14 @@ import co.sena.gestionpedidos.modelo.Pedido;
  * @param fechaPedido   fecha y hora de registro
  * @param estado        estado actual
  * @param detalles      productos del pedido
- * @param total         suma de los subtotales
+ * @param subtotal      suma de los subtotales (antes de IVA)
+ * @param iva           IVA del 19 %
+ * @param total         subtotal más IVA
  * @author Rubén Darío Herrera Beltrán
  */
 public record PedidoRespuesta(int idPedido, int idCliente, String nombreCliente, LocalDateTime fechaPedido,
-                              String estado, List<Detalle> detalles, BigDecimal total) {
+                              String estado, List<Detalle> detalles, BigDecimal subtotal, BigDecimal iva,
+                              BigDecimal total) {
 
     /**
      * Línea del pedido.
@@ -44,6 +47,7 @@ public record PedidoRespuesta(int idPedido, int idCliente, String nombreCliente,
                         d.getPrecioUnitario(), d.calcularSubtotal()))
                 .toList();
         return new PedidoRespuesta(pedido.getIdPedido(), pedido.getIdUsuario(), pedido.getNombreCliente(),
-                pedido.getFechaPedido(), pedido.getEstado().name(), detalles, pedido.calcularTotal());
+                pedido.getFechaPedido(), pedido.getEstado().name(), detalles, pedido.calcularSubtotal(),
+                pedido.calcularIva(), pedido.calcularTotal());
     }
 }

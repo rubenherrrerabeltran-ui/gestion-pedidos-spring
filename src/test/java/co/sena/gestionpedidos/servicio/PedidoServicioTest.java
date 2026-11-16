@@ -42,12 +42,14 @@ class PedidoServicioTest {
     }
 
     @Test
-    @DisplayName("Registrar un pedido fija precios, calcula el total y descuenta el stock")
+    @DisplayName("Registrar un pedido fija precios, calcula subtotal, IVA y total y descuenta el stock")
     void registrarDescuentaStock() {
         Producto producto = crearProducto("Galletas de avena", "3000", 10);
         Pedido pedido = pedidoServicio.registrar(ID_CLIENTE, Map.of(producto.getIdProducto(), 4));
         assertEquals(EstadoPedido.PENDIENTE, pedido.getEstado());
-        assertEquals(0, new BigDecimal("12000").compareTo(pedido.calcularTotal()));
+        assertEquals(0, new BigDecimal("12000").compareTo(pedido.calcularSubtotal()));
+        assertEquals(0, new BigDecimal("2280").compareTo(pedido.calcularIva()));
+        assertEquals(0, new BigDecimal("14280").compareTo(pedido.calcularTotal()));
         assertEquals(6, productoServicio.obtener(producto.getIdProducto()).getStock());
     }
 

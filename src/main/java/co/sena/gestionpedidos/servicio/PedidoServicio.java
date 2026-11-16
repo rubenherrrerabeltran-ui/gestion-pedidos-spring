@@ -1,5 +1,6 @@
 package co.sena.gestionpedidos.servicio;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +18,7 @@ import co.sena.gestionpedidos.modelo.Usuario;
 import co.sena.gestionpedidos.repositorio.PedidoRepositorio;
 import co.sena.gestionpedidos.repositorio.ProductoRepositorio;
 import co.sena.gestionpedidos.repositorio.UsuarioRepositorio;
+import co.sena.gestionpedidos.util.Validador;
 
 /**
  * Reglas de negocio de pedidos: registro con control de inventario, consulta y cambio de estado.
@@ -56,6 +58,32 @@ public class PedidoServicio {
     }
 
     /**
+     * Consulta con filtros por cliente, estado y rango de fechas (requerimiento RF06).
+     *
+     * @param idCliente    si no es {@code null}, solo pedidos de ese cliente (rol CLIENTE)
+     * @param textoCliente parte del nombre del cliente (opcional)
+     * @param estado       estado buscado (opcional)
+     * @param desde        fecha inicial incluida (opcional)
+     * @param hasta        fecha final incluida (opcional)
+     * @return pedidos que cumplen todos los filtros indicados
+     * @throws NegocioException si el rango de fechas no es válido
+     */
+    public List<Pedido> buscar(Integer idCliente, String textoCliente, EstadoPedido estado, LocalDate desde,
+                               LocalDate hasta) {
+        Validador.validarRangoFechas(desde, hasta, LocalDate.now());
+        String nombreBuscado = textoCliente == null ? "" : textoCliente.trim().toLowerCase();
+        if (nombreBuscado.length() > 100) {
+            throw new NegocioException("El nombre del cliente admite máximo 100 caracteres");
+        }
+        return pedidoRepositorio.listar(idCliente).stream()
+                .filter(p -> p.getNombreCliente().toLowerCase().contains(nombreBuscado))
+                .filter(p -> estado == null || p.getEstado() == estado)
+                .filter(p -> desde == null || !p.getFechaPedido().toLocalDate().isBefore(desde))
+                .filter(p -> hasta == null || !p.getFechaPedido().toLocalDate().isAfter(hasta))
+                .toList();
+    }
+
+    /**
      * @param idPedido identificador
      * @return el pedido con sus detalles
      * @throws RecursoNoEncontradoException si no existe
@@ -87,6 +115,10 @@ public class PedidoServicio {
             }
             if (cantidad < 0) {
                 throw new NegocioException("La cantidad no puede ser negativa");
+            }
+            if (cantidad > Validador.CANTIDAD_MAXIMA_POR_PRODUCTO) {
+                throw new NegocioException("La cantidad máxima por producto es "
+                        + Validador.CANTIDAD_MAXIMA_POR_PRODUCTO + " unidades");
             }
             Producto producto = productoRepositorio.buscarPorId(idProducto)
                     .orElseThrow(() -> new RecursoNoEncontradoException("Producto", idProducto));

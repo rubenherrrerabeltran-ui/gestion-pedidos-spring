@@ -1,6 +1,7 @@
 package co.sena.gestionpedidos.modelo;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -12,6 +13,9 @@ import java.util.List;
  * @author Rubén Darío Herrera Beltrán
  */
 public class Pedido {
+
+    /** Tarifa general del IVA en Colombia (19 %). */
+    public static final BigDecimal TASA_IVA = new BigDecimal("0.19");
 
     private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
@@ -43,12 +47,26 @@ public class Pedido {
     }
 
     /**
-     * @return suma de los subtotales de todos los detalles
+     * @return suma de los subtotales de todos los detalles (base antes de IVA)
      */
-    public BigDecimal calcularTotal() {
+    public BigDecimal calcularSubtotal() {
         return detalles.stream()
                 .map(DetallePedido::calcularSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    /**
+     * @return IVA del 19 % sobre el subtotal, redondeado a pesos enteros (requerimiento RF05)
+     */
+    public BigDecimal calcularIva() {
+        return calcularSubtotal().multiply(TASA_IVA).setScale(0, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * @return subtotal más IVA: valor que paga el cliente
+     */
+    public BigDecimal calcularTotal() {
+        return calcularSubtotal().add(calcularIva());
     }
 
     public Integer getIdPedido() {

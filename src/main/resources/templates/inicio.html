@@ -51,7 +51,7 @@
 
     <h2>Últimos pedidos</h2>
     <table class="tabla">
-        <thead><tr><th>#</th><th>Cliente</th><th>Fecha</th><th>Estado</th><th class="num">Total</th></tr></thead>
+        <thead><tr><th>#</th><th>Cliente</th><th>Fecha</th><th>Estado</th><th class="num">Total (IVA incl.)</th></tr></thead>
         <tbody>
         <tr th:each="p : ${ultimosPedidos}">
             <td><a th:href="@{/pedidos/{id}(id=${p.idPedido})}" th:text="${p.idPedido}">1</a></td>

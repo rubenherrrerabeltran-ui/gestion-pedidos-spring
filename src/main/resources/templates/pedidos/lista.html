@@ -8,13 +8,36 @@
     <section class="encabezado-pagina">
         <div>
             <h1 th:text="${usuarioActual.rol.name() == 'CLIENTE'} ? 'Mis pedidos' : 'Pedidos'">Pedidos</h1>
-            <p class="ayuda">Pedidos con sus detalles leídos en una sola consulta (JOIN) por el repositorio.</p>
+            <p class="ayuda">Consulte y filtre los pedidos por cliente, estado y rango de fechas.</p>
         </div>
         <a class="boton boton-principal" th:href="@{/pedidos/nuevo}">+ Nuevo pedido</a>
     </section>
+    <!--/* Filtros por cliente, estado y fechas (RF06). max = hoy impide elegir fechas futuras en el navegador;
+         el servidor vuelve a validar el formato y el rango. */-->
+    <form class="filtros" method="get" th:action="@{/pedidos}">
+        <label th:if="${usuarioActual.rol.name() != 'CLIENTE'}">Cliente
+            <input type="search" name="cliente" th:value="${param.cliente}" maxlength="100" placeholder="Nombre del cliente">
+        </label>
+        <label>Estado
+            <select name="estado">
+                <option value="">Todos</option>
+                <option th:each="e : ${estados}" th:value="${e}" th:text="${e}"
+                        th:selected="${param.estado != null and param.estado[0] == e.name()}">ESTADO</option>
+            </select>
+        </label>
+        <label>Desde
+            <input type="date" name="desde" th:value="${param.desde}" th:max="${hoy}">
+        </label>
+        <label>Hasta
+            <input type="date" name="hasta" th:value="${param.hasta}" th:max="${hoy}">
+        </label>
+        <button type="submit" class="boton">Filtrar</button>
+        <a class="boton boton-claro" th:href="@{/pedidos}">Limpiar</a>
+    </form>
+
     <table class="tabla">
         <thead><tr><th>#</th><th>Cliente</th><th>Fecha</th><th class="num">Productos</th><th>Estado</th>
-            <th class="num">Total</th><th></th></tr></thead>
+            <th class="num">Total (IVA incl.)</th><th></th></tr></thead>
         <tbody>
         <tr th:each="p : ${pedidos}">
             <td th:text="${p.idPedido}">1</td>
@@ -25,7 +48,7 @@
             <td class="num" th:text="'$ ' + ${#numbers.formatDecimal(p.calcularTotal(), 1, 'POINT', 0, 'COMMA')}">0</td>
             <td><a class="boton boton-pequeno" th:href="@{/pedidos/{id}(id=${p.idPedido})}">Ver detalle</a></td>
         </tr>
-        <tr th:if="${#lists.isEmpty(pedidos)}"><td colspan="7" class="vacio">No hay pedidos registrados.</td></tr>
+        <tr th:if="${#lists.isEmpty(pedidos)}"><td colspan="7" class="vacio">No hay pedidos que cumplan los filtros.</td></tr>
         </tbody>
     </table>
 </main>

@@ -97,7 +97,9 @@ class ApiRestTest {
                 "{\"items\":[{\"idProducto\":3,\"cantidad\":2}]}");
         assertEquals(201, creado.statusCode());
         assertTrue(creado.body().contains("\"estado\":\"PENDIENTE\""));
-        assertTrue(creado.body().contains("\"total\":19600"));
+        assertTrue(creado.body().contains("\"subtotal\":19600"));
+        assertTrue(creado.body().contains("\"iva\":3724"));
+        assertTrue(creado.body().contains("\"total\":23324"));
         String ubicacion = creado.headers().firstValue("Location").orElseThrow();
         ClienteHttp vendedora = conSesion("laura.vendedora@gestionpedidos.local", "Vendedor2026*");
         HttpResponse<String> pagado = vendedora.json("PATCH", ubicacion + "/estado", "{\"estado\":\"PAGADO\"}");

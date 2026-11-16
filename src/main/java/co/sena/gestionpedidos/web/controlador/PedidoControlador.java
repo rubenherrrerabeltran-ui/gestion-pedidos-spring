@@ -1,9 +1,12 @@
 package co.sena.gestionpedidos.web.controlador;
 
+import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +24,7 @@ import co.sena.gestionpedidos.modelo.Rol;
 import co.sena.gestionpedidos.servicio.PedidoServicio;
 import co.sena.gestionpedidos.servicio.ProductoServicio;
 import co.sena.gestionpedidos.servicio.UsuarioServicio;
+import co.sena.gestionpedidos.util.Validador;
 import co.sena.gestionpedidos.web.formulario.PedidoFormulario;
 import co.sena.gestionpedidos.web.seguridad.RequiereRol;
 import co.sena.gestionpedidos.web.seguridad.UsuarioSesion;
@@ -54,15 +58,35 @@ public class PedidoControlador {
     }
 
     /**
-     * GET /pedidos.
+     * GET /pedidos?cliente=...&amp;estado=...&amp;desde=AAAA-MM-DD&amp;hasta=AAAA-MM-DD (requerimiento RF06).
+     * Las fechas llegan como texto y se validan aquí para mostrar un mensaje claro si no son válidas.
      *
+     * @param cliente parte del nombre del cliente (solo para administrador y vendedor)
+     * @param estado  estado buscado (vacío = todos)
+     * @param desde   fecha inicial
+     * @param hasta   fecha final
      * @param usuario usuario autenticado
      * @param modelo  modelo para la vista
      * @return vista de la lista
      */
     @GetMapping
-    public String listar(@SessionAttribute(UsuarioSesion.ATRIBUTO) UsuarioSesion usuario, Model modelo) {
-        modelo.addAttribute("pedidos", pedidoServicio.listar(usuario.esCliente() ? usuario.idUsuario() : null));
+    public String listar(@RequestParam(required = false) String cliente,
+                         @RequestParam(required = false) String estado,
+                         @RequestParam(required = false) String desde,
+                         @RequestParam(required = false) String hasta,
+                         @SessionAttribute(UsuarioSesion.ATRIBUTO) UsuarioSesion usuario, Model modelo) {
+        modelo.addAttribute("estados", EstadoPedido.values());
+        modelo.addAttribute("hoy", LocalDate.now());
+        try {
+            EstadoPedido estadoBuscado = convertirEstado(estado);
+            LocalDate fechaDesde = Validador.convertirFecha(desde, "inicial");
+            LocalDate fechaHasta = Validador.convertirFecha(hasta, "final");
+            modelo.addAttribute("pedidos", pedidoServicio.buscar(usuario.esCliente() ? usuario.idUsuario() : null,
+                    usuario.esCliente() ? null : cliente, estadoBuscado, fechaDesde, fechaHasta));
+        } catch (NegocioException e) {
+            modelo.addAttribute("error", e.getMessage());
+            modelo.addAttribute("pedidos", List.of());
+        }
         return "pedidos/lista";
     }
 
@@ -81,15 +105,20 @@ public class PedidoControlador {
      * POST /pedidos/guardar: registra el pedido (transacción en el servicio).
      *
      * @param formulario cliente y cantidades por producto
+     * @param enlace     errores de conversión (cantidades con decimales o texto)
      * @param usuario    usuario autenticado
      * @param modelo     modelo para volver a mostrar el formulario
      * @param atributos  mensajes flash
      * @return redirección al detalle del pedido o el formulario con el error
      */
     @PostMapping("/guardar")
-    public String guardar(@ModelAttribute("pedido") PedidoFormulario formulario,
+    public String guardar(@ModelAttribute("pedido") PedidoFormulario formulario, BindingResult enlace,
                           @SessionAttribute(UsuarioSesion.ATRIBUTO) UsuarioSesion usuario, Model modelo,
                           RedirectAttributes atributos) {
+        if (enlace.hasErrors()) {
+            modelo.addAttribute("error", "Las cantidades deben ser números enteros (sin decimales ni letras)");
+            return mostrarFormulario(new PedidoFormulario(), modelo);
+        }
         // Un cliente siempre registra a su nombre, aunque se altere el campo en el navegador
         Integer idCliente = usuario.esCliente() ? Integer.valueOf(usuario.idUsuario()) : formulario.getIdCliente();
         try {
@@ -163,6 +192,17 @@ public class PedidoControlador {
             atributos.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/pedidos/" + id;
+    }
+
+    private static EstadoPedido convertirEstado(String estado) {
+        if (estado == null || estado.isBlank()) {
+            return null;
+        }
+        try {
+            return EstadoPedido.valueOf(estado.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new NegocioException("El estado \"" + estado + "\" no existe");
+        }
     }
 
     private String mostrarFormulario(PedidoFormulario formulario, Model modelo) {
