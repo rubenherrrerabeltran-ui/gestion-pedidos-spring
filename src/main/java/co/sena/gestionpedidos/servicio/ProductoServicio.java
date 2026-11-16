@@ -1,6 +1,7 @@
 package co.sena.gestionpedidos.servicio;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,28 @@ public class ProductoServicio {
     }
 
     /**
+     * Consulta con búsqueda por nombre y filtro por estado del inventario (requerimiento RF04).
+     *
+     * @param texto  filtro opcional por nombre
+     * @param filtro {@code todos}, {@code activos}, {@code inactivos} o {@code stock-bajo}
+     * @return productos que cumplen ambos criterios
+     * @throws NegocioException si el filtro no existe
+     */
+    public List<Producto> listar(String texto, String filtro) {
+        if (texto != null && texto.length() > 120) {
+            throw new NegocioException("El texto de búsqueda admite máximo 120 caracteres");
+        }
+        Predicate<Producto> condicion = switch (filtro == null || filtro.isBlank() ? "todos" : filtro) {
+            case "todos" -> producto -> true;
+            case "activos" -> Producto::isActivo;
+            case "inactivos" -> producto -> !producto.isActivo();
+            case "stock-bajo" -> producto -> producto.isActivo() && producto.getStock() < UMBRAL_STOCK_BAJO;
+            default -> throw new NegocioException("El filtro \"" + filtro + "\" no existe");
+        };
+        return productoRepositorio.listar(texto).stream().filter(condicion).toList();
+    }
+
+    /**
      * @return productos activos con stock, para armar un pedido
      */
     public List<Producto> listarDisponibles() {
@@ -67,10 +90,9 @@ public class ProductoServicio {
      */
     @Transactional
     public Producto guardar(Producto producto) {
-        producto.setNombreProducto(
-                Validador.validarTextoObligatorio(producto.getNombreProducto(), "nombre del producto", 120));
+        producto.setNombreProducto(Validador.validarNombreProducto(producto.getNombreProducto()));
         Validador.validarPrecio(producto.getPrecio());
-        Validador.validarMinimo(producto.getStock(), "stock", 0);
+        Validador.validarStock(producto.getStock());
         if (producto.getIdProducto() != null) {
             obtener(producto.getIdProducto()); // verifica que exista antes de actualizar
         }

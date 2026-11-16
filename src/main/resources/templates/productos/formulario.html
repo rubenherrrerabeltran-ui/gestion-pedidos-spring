@@ -13,15 +13,16 @@
         <form class="formulario" method="post" th:action="@{/productos/guardar}" th:object="${producto}">
             <input type="hidden" th:field="*{idProducto}">
             <label for="nombreProducto">Nombre del producto</label>
-            <input type="text" th:field="*{nombreProducto}" required maxlength="120">
+            <input type="text" th:field="*{nombreProducto}" required minlength="3" maxlength="120"
+                   title="Letras, números, espacios y . , / ( ) % &amp; ' ° + -">
             <div class="fila">
                 <div>
                     <label for="precio">Precio (COP)</label>
-                    <input type="number" th:field="*{precio}" required min="0" step="0.01">
+                    <input type="number" th:field="*{precio}" required min="0.01" max="100000000" step="0.01">
                 </div>
                 <div>
                     <label for="stock">Stock</label>
-                    <input type="number" th:field="*{stock}" required min="0" step="1">
+                    <input type="number" th:field="*{stock}" required min="0" max="100000" step="1">
                 </div>
             </div>
             <label class="casilla"><input type="checkbox" th:field="*{activo}"> Producto activo (disponible para la venta)</label>

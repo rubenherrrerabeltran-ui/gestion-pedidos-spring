@@ -8,17 +8,28 @@
     <section class="encabezado-pagina">
         <div>
             <h1>Productos</h1>
-            <p class="ayuda">Inventario leído de la base de datos con <code>JdbcClient</code>. La búsqueda usa
-                <strong>GET</strong> (<code>?texto=...</code>) porque solo consulta datos.</p>
+            <p class="ayuda">Inventario leído de la base de datos con <code>JdbcClient</code>. La búsqueda y el filtro usan
+                <strong>GET</strong> porque solo consultan datos.</p>
         </div>
         <a class="boton boton-principal" th:if="${usuarioActual.rol.name() != 'CLIENTE'}"
            th:href="@{/productos/nuevo}">+ Nuevo producto</a>
     </section>
 
-    <form class="buscador" method="get" th:action="@{/productos}">
-        <input type="search" name="texto" th:value="${texto}" placeholder="Buscar por nombre…">
+    <!--/* Búsqueda y filtro por GET: los criterios quedan en la URL y la consulta se puede repetir */-->
+    <form class="filtros" method="get" th:action="@{/productos}">
+        <label>Nombre contiene
+            <input type="search" name="texto" th:value="${texto}" maxlength="120" placeholder="Buscar por nombre…">
+        </label>
+        <label>Mostrar
+            <select name="filtro">
+                <option value="todos" th:selected="${filtro == 'todos'}">Todos</option>
+                <option value="activos" th:selected="${filtro == 'activos'}">Solo activos</option>
+                <option value="inactivos" th:selected="${filtro == 'inactivos'}">Solo inactivos</option>
+                <option value="stock-bajo" th:selected="${filtro == 'stock-bajo'}">Stock bajo (menos de 10)</option>
+            </select>
+        </label>
         <button type="submit" class="boton">Buscar</button>
-        <a class="boton boton-claro" th:if="${texto != null and !#strings.isEmpty(texto)}" th:href="@{/productos}">Ver todos</a>
+        <a class="boton boton-claro" th:href="@{/productos}">Limpiar</a>
     </form>
 
     <table class="tabla">

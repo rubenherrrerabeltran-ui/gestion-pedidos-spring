@@ -1,5 +1,7 @@
 package co.sena.gestionpedidos.web.controlador;
 
+import java.util.List;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -40,16 +42,24 @@ public class ProductoControlador {
     }
 
     /**
-     * GET /productos?texto=...: lista y busca productos (todos los roles).
+     * GET /productos?texto=...&amp;filtro=...: lista, busca y filtra productos (todos los roles).
      *
      * @param texto  filtro opcional por nombre
+     * @param filtro todos, activos, inactivos o stock-bajo
      * @param modelo modelo para la vista
      * @return vista de la lista
      */
     @GetMapping
-    public String listar(@RequestParam(required = false) String texto, Model modelo) {
-        modelo.addAttribute("productos", productoServicio.listar(texto));
+    public String listar(@RequestParam(required = false) String texto,
+                         @RequestParam(required = false, defaultValue = "todos") String filtro, Model modelo) {
+        try {
+            modelo.addAttribute("productos", productoServicio.listar(texto, filtro));
+        } catch (NegocioException e) {
+            modelo.addAttribute("error", e.getMessage());
+            modelo.addAttribute("productos", List.of());
+        }
         modelo.addAttribute("texto", texto);
+        modelo.addAttribute("filtro", filtro);
         modelo.addAttribute("umbralStockBajo", ProductoServicio.UMBRAL_STOCK_BAJO);
         return "productos/lista";
     }

@@ -28,7 +28,7 @@ public class ProductoRepositorioJdbc implements ProductoRepositorio {
     private static final String SQL_LISTAR = """
             SELECT id_producto, nombre_producto, precio, stock, activo
             FROM producto
-            WHERE LOWER(nombre_producto) LIKE :patron
+            WHERE LOWER(nombre_producto) LIKE :patron ESCAPE '!'
             ORDER BY nombre_producto""";
     private static final String SQL_DISPONIBLES = """
             SELECT id_producto, nombre_producto, precio, stock, activo
@@ -66,7 +66,10 @@ public class ProductoRepositorioJdbc implements ProductoRepositorio {
 
     @Override
     public List<Producto> listar(String texto) {
-        String patron = "%" + (texto == null ? "" : texto.trim().toLowerCase()) + "%";
+        // Los comodines % y _ escritos por el usuario se buscan como texto normal (se escapan con !)
+        String buscado = texto == null ? "" : texto.trim().toLowerCase()
+                .replace("!", "!!").replace("%", "!%").replace("_", "!_");
+        String patron = "%" + buscado + "%";
         return jdbcClient.sql(SQL_LISTAR).param("patron", patron).query(this::mapear).list();
     }
 
