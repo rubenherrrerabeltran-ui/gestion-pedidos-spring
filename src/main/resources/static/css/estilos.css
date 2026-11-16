@@ -154,7 +154,8 @@ h1 { font-size: 26px; margin: 0 0 6px; }
 @media (max-width: 760px) {
     body { font-size: 14px; }
     .barra { flex-wrap: wrap; gap: 10px; padding: 10px 14px; }
-    .menu { order: 3; width: 100%; overflow-x: auto; }
+    .menu { order: 3; flex: 1 1 100%; overflow-x: auto; }
+    .tabla th, .tabla td { padding: 8px 10px; }
     .menu a { padding: 6px 10px; white-space: nowrap; }
     .sesion { margin-left: auto; gap: 8px; }
     .sesion > span { display: none; }
