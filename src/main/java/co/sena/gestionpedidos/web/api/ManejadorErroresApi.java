@@ -5,6 +5,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import co.sena.gestionpedidos.excepcion.AccesoDenegadoException;
 import co.sena.gestionpedidos.excepcion.NegocioException;
@@ -44,6 +45,16 @@ public class ManejadorErroresApi {
     @ExceptionHandler(NegocioException.class)
     public ProblemDetail reglaDeNegocio(NegocioException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, e.getMessage());
+    }
+
+    /**
+     * @param e excepción
+     * @return 400 Bad Request cuando un parámetro de la ruta no tiene el tipo esperado (por ejemplo, texto en un id)
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ProblemDetail parametroInvalido(MethodArgumentTypeMismatchException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
+                "El valor \"" + e.getValue() + "\" no es válido para el parámetro " + e.getName());
     }
 
     /**

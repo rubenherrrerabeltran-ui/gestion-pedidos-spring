@@ -7,6 +7,8 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 
 import co.sena.gestionpedidos.excepcion.NegocioException;
+import co.sena.gestionpedidos.modelo.EstadoPedido;
+import co.sena.gestionpedidos.modelo.Rol;
 
 /**
  * Validaciones de datos de entrada antes de enviarlos a la base de datos (textos, caracteres especiales,
@@ -222,6 +224,41 @@ public final class Validador {
         if (desde != null && hasta != null && desde.isAfter(hasta)) {
             throw new NegocioException("La fecha inicial (" + desde + ") no puede ser posterior a la fecha final ("
                     + hasta + ")");
+        }
+    }
+
+    /**
+     * Convierte el nombre de un estado (sin distinguir mayúsculas) en {@link EstadoPedido}.
+     *
+     * @param texto nombre del estado, por ejemplo "pagado"
+     * @return el estado, o {@code null} si el texto está vacío
+     */
+    public static EstadoPedido convertirEstado(String texto) {
+        if (texto == null || texto.isBlank()) {
+            return null;
+        }
+        try {
+            return EstadoPedido.valueOf(texto.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            throw new NegocioException("El estado \"" + texto
+                    + "\" no existe; use PENDIENTE, PAGADO, ENVIADO o CANCELADO");
+        }
+    }
+
+    /**
+     * Convierte el nombre de un rol (sin distinguir mayúsculas) en {@link Rol}.
+     *
+     * @param texto nombre del rol, por ejemplo "vendedor"
+     * @return el rol
+     */
+    public static Rol convertirRol(String texto) {
+        if (texto == null || texto.isBlank()) {
+            throw new NegocioException("El rol es obligatorio");
+        }
+        try {
+            return Rol.valueOf(texto.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            throw new NegocioException("El rol \"" + texto + "\" no existe; use ADMINISTRADOR, VENDEDOR o CLIENTE");
         }
     }
 

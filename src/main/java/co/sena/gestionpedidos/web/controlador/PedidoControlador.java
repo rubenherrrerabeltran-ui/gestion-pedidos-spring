@@ -78,7 +78,7 @@ public class PedidoControlador {
         modelo.addAttribute("estados", EstadoPedido.values());
         modelo.addAttribute("hoy", LocalDate.now());
         try {
-            EstadoPedido estadoBuscado = convertirEstado(estado);
+            EstadoPedido estadoBuscado = Validador.convertirEstado(estado);
             LocalDate fechaDesde = Validador.convertirFecha(desde, "inicial");
             LocalDate fechaHasta = Validador.convertirFecha(hasta, "final");
             modelo.addAttribute("pedidos", pedidoServicio.buscar(usuario.esCliente() ? usuario.idUsuario() : null,
@@ -192,17 +192,6 @@ public class PedidoControlador {
             atributos.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/pedidos/" + id;
-    }
-
-    private static EstadoPedido convertirEstado(String estado) {
-        if (estado == null || estado.isBlank()) {
-            return null;
-        }
-        try {
-            return EstadoPedido.valueOf(estado.trim().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new NegocioException("El estado \"" + estado + "\" no existe");
-        }
     }
 
     private String mostrarFormulario(PedidoFormulario formulario, Model modelo) {

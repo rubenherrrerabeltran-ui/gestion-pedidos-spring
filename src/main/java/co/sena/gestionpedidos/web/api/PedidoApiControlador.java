@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
@@ -17,16 +18,15 @@ import co.sena.gestionpedidos.excepcion.AccesoDenegadoException;
 import co.sena.gestionpedidos.excepcion.NegocioException;
 import co.sena.gestionpedidos.modelo.EstadoPedido;
 import co.sena.gestionpedidos.modelo.Pedido;
-import co.sena.gestionpedidos.modelo.Rol;
 import co.sena.gestionpedidos.servicio.PedidoServicio;
+import co.sena.gestionpedidos.util.Validador;
 import co.sena.gestionpedidos.web.api.dto.CambioEstadoSolicitud;
 import co.sena.gestionpedidos.web.api.dto.PedidoRespuesta;
 import co.sena.gestionpedidos.web.api.dto.PedidoSolicitud;
-import co.sena.gestionpedidos.web.seguridad.RequiereRol;
 import co.sena.gestionpedidos.web.seguridad.UsuarioSesion;
 
 /**
- * API REST de pedidos (JSON). Requiere sesión; un CLIENTE solo accede a sus propios pedidos.
+ * API REST de pedidos (JSON). Requiere sesión; un CLIENTE solo consulta, registra y cancela sus propios pedidos.
  *
  * @author Rubén Darío Herrera Beltrán
  */
@@ -44,14 +44,25 @@ public class PedidoApiControlador {
     }
 
     /**
-     * GET /api/pedidos
+     * GET /api/pedidos?cliente=...&amp;estado=...&amp;desde=AAAA-MM-DD&amp;hasta=AAAA-MM-DD
      *
+     * @param cliente parte del nombre del cliente (se ignora si quien consulta es un CLIENTE)
+     * @param estado  estado buscado (opcional)
+     * @param desde   fecha inicial (opcional)
+     * @param hasta   fecha final (opcional)
      * @param usuario usuario autenticado
-     * @return pedidos visibles para el usuario
+     * @return pedidos visibles para el usuario que cumplen los filtros
      */
     @GetMapping
-    public List<PedidoRespuesta> listar(@SessionAttribute(UsuarioSesion.ATRIBUTO) UsuarioSesion usuario) {
-        return pedidoServicio.listar(usuario.esCliente() ? usuario.idUsuario() : null).stream()
+    public List<PedidoRespuesta> listar(@RequestParam(required = false) String cliente,
+                                        @RequestParam(required = false) String estado,
+                                        @RequestParam(required = false) String desde,
+                                        @RequestParam(required = false) String hasta,
+                                        @SessionAttribute(UsuarioSesion.ATRIBUTO) UsuarioSesion usuario) {
+        return pedidoServicio.buscar(usuario.esCliente() ? usuario.idUsuario() : null,
+                        usuario.esCliente() ? null : cliente, Validador.convertirEstado(estado),
+                        Validador.convertirFecha(desde, "inicial"), Validador.convertirFecha(hasta, "final"))
+                .stream()
                 .map(PedidoRespuesta::desde)
                 .toList();
     }
@@ -93,20 +104,26 @@ public class PedidoApiControlador {
     }
 
     /**
-     * PATCH /api/pedidos/{id}/estado
+     * PATCH /api/pedidos/{id}/estado. El administrador y el vendedor aplican cualquier transición permitida;
+     * el cliente solo puede cancelar sus propios pedidos.
      *
      * @param id        pedido
      * @param solicitud estado destino en JSON
+     * @param usuario   usuario autenticado
      * @return el pedido actualizado
      */
     @PatchMapping("/{id}/estado")
-    @RequiereRol({Rol.ADMINISTRADOR, Rol.VENDEDOR})
-    public PedidoRespuesta cambiarEstado(@PathVariable int id, @RequestBody CambioEstadoSolicitud solicitud) {
-        EstadoPedido nuevoEstado;
-        try {
-            nuevoEstado = EstadoPedido.valueOf(String.valueOf(solicitud.estado()).toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new NegocioException("Estado no válido: " + solicitud.estado());
+    public PedidoRespuesta cambiarEstado(@PathVariable int id, @RequestBody CambioEstadoSolicitud solicitud,
+                                         @SessionAttribute(UsuarioSesion.ATRIBUTO) UsuarioSesion usuario) {
+        EstadoPedido nuevoEstado = Validador.convertirEstado(solicitud.estado());
+        if (nuevoEstado == null) {
+            throw new NegocioException("Indique el estado destino");
+        }
+        if (usuario.esCliente()) {
+            Pedido pedido = pedidoServicio.obtener(id);
+            if (pedido.getIdUsuario() != usuario.idUsuario() || nuevoEstado != EstadoPedido.CANCELADO) {
+                throw new AccesoDenegadoException("Un cliente solo puede cancelar sus propios pedidos");
+            }
         }
         return PedidoRespuesta.desde(pedidoServicio.cambiarEstado(id, nuevoEstado));
     }

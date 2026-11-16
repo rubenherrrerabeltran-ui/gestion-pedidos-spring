@@ -42,15 +42,17 @@ public class ProductoApiControlador {
     }
 
     /**
-     * GET /api/productos?texto=...
+     * GET /api/productos?texto=...&amp;filtro=todos|activos|inactivos|stock-bajo
      *
-     * @param texto filtro opcional por nombre
+     * @param texto  filtro opcional por nombre
+     * @param filtro estado del inventario (por defecto todos)
      * @return lista de productos en JSON
      */
     @GetMapping
     @Publico
-    public List<Producto> listar(@RequestParam(required = false) String texto) {
-        return productoServicio.listar(texto);
+    public List<Producto> listar(@RequestParam(required = false) String texto,
+                                 @RequestParam(required = false, defaultValue = "todos") String filtro) {
+        return productoServicio.listar(texto, filtro);
     }
 
     /**
