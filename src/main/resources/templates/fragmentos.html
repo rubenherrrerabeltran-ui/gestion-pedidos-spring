@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<!--/*
+  Fragmentos reutilizables de Thymeleaf (equivalen a los .jspf de la evidencia AA2-EV02).
+  Se insertan en las páginas con th:replace="~{fragmentos :: nombre}".
+*/-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="cabeza(titulo)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${titulo} + ' | Gestión de Pedidos'">Gestión de Pedidos</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+
+<header class="barra" th:fragment="encabezado">
+    <a class="marca" th:href="@{/}">
+        <span class="marca-icono">GP</span>
+        <span>Gestión de Pedidos</span>
+    </a>
+    <th:block th:if="${usuarioActual != null}">
+        <nav class="menu">
+            <a th:href="@{/}" th:classappend="${rutaActual == '/' or rutaActual == '/inicio'} ? 'activo'">Inicio</a>
+            <a th:href="@{/productos}" th:classappend="${#strings.startsWith(rutaActual, '/productos')} ? 'activo'">Productos</a>
+            <a th:href="@{/pedidos}" th:classappend="${#strings.startsWith(rutaActual, '/pedidos')} ? 'activo'">Pedidos</a>
+            <a th:if="${usuarioActual.rol.name() == 'ADMINISTRADOR'}" th:href="@{/usuarios}"
+               th:classappend="${#strings.startsWith(rutaActual, '/usuarios')} ? 'activo'">Usuarios</a>
+        </nav>
+        <div class="sesion">
+            <span><span th:text="${usuarioActual.nombre}">Usuario</span>
+                <small th:text="'(' + ${usuarioActual.rol} + ')'">(ROL)</small></span>
+            <form method="post" th:action="@{/logout}">
+                <button type="submit" class="boton boton-claro">Salir</button>
+            </form>
+        </div>
+    </th:block>
+</header>
+
+<th:block th:fragment="mensajes">
+    <div class="alerta alerta-exito" th:if="${exito != null}" th:text="${exito}">Operación exitosa</div>
+    <div class="alerta alerta-error" th:if="${error != null}" th:text="${error}">Error</div>
+</th:block>
+
+<footer class="pie" th:fragment="pie">
+    <span>SENA · Análisis y Desarrollo de Software · Ficha 3186691 · Rubén Darío Herrera Beltrán</span>
+    <span th:text="'Spring Boot ' + ${versionSpringBoot} + ' · Thymeleaf · MySQL'">Spring Boot</span>
+</footer>
+
+</body>
+</html>

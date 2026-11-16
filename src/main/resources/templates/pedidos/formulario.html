@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: cabeza('Nuevo pedido')}"></head>
+<body>
+<header th:replace="~{fragmentos :: encabezado}"></header>
+<main class="contenido">
+    <th:block th:replace="~{fragmentos :: mensajes}"></th:block>
+    <section class="tarjeta-formulario ancho">
+        <h1>Nuevo pedido</h1>
+        <p class="ayuda">Escriba la cantidad de cada producto. Al guardar, el servicio descuenta el stock dentro de
+            una transacción (<code>@Transactional</code>): si un producto no alcanza, no se guarda nada.</p>
+        <form class="formulario" method="post" th:action="@{/pedidos/guardar}" th:object="${pedido}">
+            <th:block th:if="${usuarioActual.rol.name() != 'CLIENTE'}">
+                <label for="idCliente">Cliente</label>
+                <select th:field="*{idCliente}" required>
+                    <option value="">Seleccione…</option>
+                    <option th:each="c : ${clientes}" th:value="${c.idUsuario}"
+                            th:text="${c.nombre} + ' (' + ${c.correo} + ')'">Cliente</option>
+                </select>
+            </th:block>
+            <p class="ayuda" th:if="${usuarioActual.rol.name() == 'CLIENTE'}"
+               th:text="'El pedido se registrará a nombre de ' + ${usuarioActual.nombre}">cliente</p>
+            <table class="tabla tabla-formulario">
+                <thead><tr><th>Producto</th><th class="num">Precio</th><th class="num">Disponible</th><th class="num">Cantidad</th></tr></thead>
+                <tbody>
+                <tr th:each="prod : ${productos}">
+                    <td th:text="${prod.nombreProducto}">Producto</td>
+                    <td class="num" th:text="'$ ' + ${#numbers.formatDecimal(prod.precio, 1, 'POINT', 0, 'COMMA')}">0</td>
+                    <td class="num" th:text="${prod.stock}">0</td>
+                    <!--/* name="cantidades[ID]": Spring lo enlaza en el mapa PedidoFormulario.cantidades */-->
+                    <td class="num"><input type="number" min="0" th:max="${prod.stock}" step="1"
+                                           th:name="'cantidades[' + ${prod.idProducto} + ']'"
+                                           th:value="${pedido.cantidades[prod.idProducto] != null} ? ${pedido.cantidades[prod.idProducto]} : 0"></td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="botones">
+                <button type="submit" class="boton boton-principal">Registrar pedido</button>
+                <a class="boton boton-claro" th:href="@{/pedidos}">Cancelar</a>
+            </div>
+        </form>
+    </section>
+</main>
+<footer th:replace="~{fragmentos :: pie}"></footer>
+</body>
+</html>

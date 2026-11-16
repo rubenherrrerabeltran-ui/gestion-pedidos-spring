@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: cabeza(${producto.idProducto == null} ? 'Nuevo producto' : 'Editar producto')}"></head>
+<body>
+<header th:replace="~{fragmentos :: encabezado}"></header>
+<main class="contenido">
+    <th:block th:replace="~{fragmentos :: mensajes}"></th:block>
+    <section class="tarjeta-formulario">
+        <h1 th:text="${producto.idProducto == null} ? 'Nuevo producto' : 'Editar producto #' + ${producto.idProducto}">Producto</h1>
+        <p class="ayuda">Los campos se enlazan al objeto <code>Producto</code> con <code>th:object</code> y
+            <code>th:field</code>; Spring MVC los recibe con <code>@ModelAttribute</code>.</p>
+        <!--/* th:object enlaza el formulario al objeto "producto" del modelo */-->
+        <form class="formulario" method="post" th:action="@{/productos/guardar}" th:object="${producto}">
+            <input type="hidden" th:field="*{idProducto}">
+            <label for="nombreProducto">Nombre del producto</label>
+            <input type="text" th:field="*{nombreProducto}" required maxlength="120">
+            <div class="fila">
+                <div>
+                    <label for="precio">Precio (COP)</label>
+                    <input type="number" th:field="*{precio}" required min="0" step="0.01">
+                </div>
+                <div>
+                    <label for="stock">Stock</label>
+                    <input type="number" th:field="*{stock}" required min="0" step="1">
+                </div>
+            </div>
+            <label class="casilla"><input type="checkbox" th:field="*{activo}"> Producto activo (disponible para la venta)</label>
+            <div class="botones">
+                <button type="submit" class="boton boton-principal">Guardar</button>
+                <a class="boton boton-claro" th:href="@{/productos}">Cancelar</a>
+            </div>
+        </form>
+    </section>
+</main>
+<footer th:replace="~{fragmentos :: pie}"></footer>
+</body>
+</html>

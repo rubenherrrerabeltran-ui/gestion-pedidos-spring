@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: cabeza('Pedido #' + ${pedido.idPedido})}"></head>
+<body>
+<header th:replace="~{fragmentos :: encabezado}"></header>
+<main class="contenido">
+    <th:block th:replace="~{fragmentos :: mensajes}"></th:block>
+    <section class="encabezado-pagina">
+        <div>
+            <h1 th:text="'Pedido #' + ${pedido.idPedido}">Pedido</h1>
+            <p class="ayuda">
+                Cliente: <strong th:text="${pedido.nombreCliente}">Cliente</strong> ·
+                Fecha: <span th:text="${#temporals.format(pedido.fechaPedido, 'dd/MM/yyyy HH:mm')}">fecha</span> ·
+                Estado: <span class="estado" th:classappend="'estado-' + ${pedido.estado.codigoBd}" th:text="${pedido.estado}">ESTADO</span>
+            </p>
+        </div>
+        <a class="boton boton-claro" th:href="@{/pedidos}">← Volver</a>
+    </section>
+
+    <table class="tabla">
+        <thead><tr><th>Producto</th><th class="num">Cantidad</th><th class="num">Precio unitario</th><th class="num">Subtotal</th></tr></thead>
+        <tbody>
+        <tr th:each="d : ${pedido.detalles}">
+            <td th:text="${d.nombreProducto}">Producto</td>
+            <td class="num" th:text="${d.cantidad}">1</td>
+            <td class="num" th:text="'$ ' + ${#numbers.formatDecimal(d.precioUnitario, 1, 'POINT', 0, 'COMMA')}">0</td>
+            <td class="num" th:text="'$ ' + ${#numbers.formatDecimal(d.calcularSubtotal(), 1, 'POINT', 0, 'COMMA')}">0</td>
+        </tr>
+        </tbody>
+        <tfoot><tr><th colspan="3">Total</th>
+            <th class="num" th:text="'$ ' + ${#numbers.formatDecimal(pedido.calcularTotal(), 1, 'POINT', 0, 'COMMA')}">0</th></tr></tfoot>
+    </table>
+
+    <!--/* Cambio de estado: solo ADMINISTRADOR y VENDEDOR; el servicio valida la transición */-->
+    <section class="acciones-pedido" th:if="${usuarioActual.rol.name() != 'CLIENTE' and !#lists.isEmpty(estadosSiguientes)}">
+        <form class="en-linea" method="post" th:action="@{/pedidos/{id}/estado(id=${pedido.idPedido})}">
+            <label for="nuevoEstado">Cambiar estado a</label>
+            <select id="nuevoEstado" name="nuevoEstado">
+                <option th:each="e : ${estadosSiguientes}" th:value="${e}" th:text="${e}">ESTADO</option>
+            </select>
+            <button type="submit" class="boton boton-principal">Aplicar</button>
+        </form>
+    </section>
+    <section class="acciones-pedido" th:if="${usuarioActual.rol.name() == 'CLIENTE' and pedido.estado.name() == 'PENDIENTE'}">
+        <form method="post" th:action="@{/pedidos/{id}/cancelar(id=${pedido.idPedido})}"
+              onsubmit="return confirm('¿Cancelar el pedido?')">
+            <button type="submit" class="boton boton-peligro">Cancelar pedido</button>
+        </form>
+    </section>
+</main>
+<footer th:replace="~{fragmentos :: pie}"></footer>
+</body>
+</html>

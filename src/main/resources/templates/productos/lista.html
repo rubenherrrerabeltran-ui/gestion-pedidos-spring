@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: cabeza('Productos')}"></head>
+<body>
+<header th:replace="~{fragmentos :: encabezado}"></header>
+<main class="contenido">
+    <th:block th:replace="~{fragmentos :: mensajes}"></th:block>
+    <section class="encabezado-pagina">
+        <div>
+            <h1>Productos</h1>
+            <p class="ayuda">Inventario leído de MySQL con <code>JdbcClient</code>. La búsqueda usa
+                <strong>GET</strong> (<code>?texto=...</code>) porque solo consulta datos.</p>
+        </div>
+        <a class="boton boton-principal" th:if="${usuarioActual.rol.name() != 'CLIENTE'}"
+           th:href="@{/productos/nuevo}">+ Nuevo producto</a>
+    </section>
+
+    <form class="buscador" method="get" th:action="@{/productos}">
+        <input type="search" name="texto" th:value="${texto}" placeholder="Buscar por nombre…">
+        <button type="submit" class="boton">Buscar</button>
+        <a class="boton boton-claro" th:if="${texto != null and !#strings.isEmpty(texto)}" th:href="@{/productos}">Ver todos</a>
+    </form>
+
+    <table class="tabla">
+        <thead>
+        <tr><th>ID</th><th>Nombre</th><th class="num">Precio</th><th class="num">Stock</th><th>Estado</th>
+            <th th:if="${usuarioActual.rol.name() != 'CLIENTE'}">Acciones</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="p : ${productos}">
+            <td th:text="${p.idProducto}">1</td>
+            <td th:text="${p.nombreProducto}">Nombre</td>
+            <td class="num" th:text="'$ ' + ${#numbers.formatDecimal(p.precio, 1, 'POINT', 0, 'COMMA')}">0</td>
+            <td class="num" th:classappend="${p.stock < umbralStockBajo} ? 'stock-bajo'" th:text="${p.stock}">0</td>
+            <td th:text="${p.activo} ? 'Activo' : 'Inactivo'">Activo</td>
+            <td class="acciones" th:if="${usuarioActual.rol.name() != 'CLIENTE'}">
+                <a class="boton boton-pequeno" th:href="@{/productos/{id}/editar(id=${p.idProducto})}">Editar</a>
+                <form method="post" th:if="${usuarioActual.rol.name() == 'ADMINISTRADOR'}"
+                      th:action="@{/productos/{id}/eliminar(id=${p.idProducto})}"
+                      th:data-confirmar="|¿Eliminar el producto ${p.idProducto}?|" onsubmit="return confirm(this.dataset.confirmar)">
+                    <button type="submit" class="boton boton-pequeno boton-peligro">Eliminar</button>
+                </form>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(productos)}"><td colspan="6" class="vacio">No se encontraron productos.</td></tr>
+        </tbody>
+    </table>
+    <p class="ayuda" th:text="'Total: ' + ${#lists.size(productos)} + ' producto(s)'">Total</p>
+</main>
+<footer th:replace="~{fragmentos :: pie}"></footer>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: cabeza('Inicio')}"></head>
+<body>
+<header th:replace="~{fragmentos :: encabezado}"></header>
+<main class="contenido">
+    <th:block th:replace="~{fragmentos :: mensajes}"></th:block>
+    <section class="encabezado-pagina">
+        <div>
+            <h1 th:text="'Hola, ' + ${usuarioActual.nombre}">Hola</h1>
+            <p class="ayuda">Rol: <strong th:text="${usuarioActual.rol}">ROL</strong> ·
+                Fecha del servidor: <span th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy HH:mm')}">fecha</span></p>
+        </div>
+    </section>
+
+    <!--/* Tarjetas de indicadores calculados por los servicios de Spring */-->
+    <section class="tarjetas">
+        <a class="tarjeta" th:href="@{/productos}">
+            <span class="tarjeta-titulo">Productos</span>
+            <span class="tarjeta-valor" th:text="${totalProductos}">0</span>
+            <span class="tarjeta-detalle" th:text="${productosStockBajo} + ' con stock bajo (menos de 10)'">detalle</span>
+        </a>
+        <a class="tarjeta" th:href="@{/pedidos}">
+            <span class="tarjeta-titulo">Pedidos pendientes</span>
+            <span class="tarjeta-valor" th:text="${conteoPedidos['PENDIENTE']}">0</span>
+            <span class="tarjeta-detalle"
+                  th:text="${conteoPedidos['PAGADO']} + ' pagados · '
+                           + ${conteoPedidos['ENVIADO']} + ' enviados'">detalle</span>
+        </a>
+        <a class="tarjeta" th:href="${usuarioActual.rol.name() == 'ADMINISTRADOR'} ? @{/usuarios} : @{/}">
+            <span class="tarjeta-titulo">Usuarios</span>
+            <span class="tarjeta-valor" th:text="${totalUsuarios}">0</span>
+            <span class="tarjeta-detalle">Administradores, vendedores y clientes</span>
+        </a>
+    </section>
+
+    <section class="accesos">
+        <a class="boton boton-principal" th:href="@{/pedidos/nuevo}">+ Nuevo pedido</a>
+        <a class="boton" th:if="${usuarioActual.rol.name() != 'CLIENTE'}" th:href="@{/productos/nuevo}">+ Nuevo producto</a>
+        <a class="boton" th:href="@{/api/productos}" target="_blank">Ver API JSON de productos</a>
+    </section>
+
+    <h2>Últimos pedidos</h2>
+    <table class="tabla">
+        <thead><tr><th>#</th><th>Cliente</th><th>Fecha</th><th>Estado</th><th class="num">Total</th></tr></thead>
+        <tbody>
+        <tr th:each="p : ${ultimosPedidos}">
+            <td><a th:href="@{/pedidos/{id}(id=${p.idPedido})}" th:text="${p.idPedido}">1</a></td>
+            <td th:text="${p.nombreCliente}">Cliente</td>
+            <td th:text="${#temporals.format(p.fechaPedido, 'dd/MM/yyyy HH:mm')}">fecha</td>
+            <td><span class="estado" th:classappend="'estado-' + ${p.estado.codigoBd}" th:text="${p.estado}">ESTADO</span></td>
+            <td class="num" th:text="'$ ' + ${#numbers.formatDecimal(p.calcularTotal(), 1, 'POINT', 0, 'COMMA')}">0</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(ultimosPedidos)}"><td colspan="5" class="vacio">Aún no hay pedidos.</td></tr>
+        </tbody>
+    </table>
+</main>
+<footer th:replace="~{fragmentos :: pie}"></footer>
+</body>
+</html>

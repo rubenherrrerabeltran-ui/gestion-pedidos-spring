@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: cabeza('Usuarios')}"></head>
+<body>
+<header th:replace="~{fragmentos :: encabezado}"></header>
+<main class="contenido">
+    <th:block th:replace="~{fragmentos :: mensajes}"></th:block>
+    <section class="encabezado-pagina">
+        <div>
+            <h1>Usuarios</h1>
+            <p class="ayuda">Módulo exclusivo del rol ADMINISTRADOR (anotación <code>@RequiereRol</code>).</p>
+        </div>
+        <a class="boton boton-principal" th:href="@{/usuarios/nuevo}">+ Nuevo usuario</a>
+    </section>
+    <table class="tabla">
+        <thead><tr><th>ID</th><th>Nombre</th><th>Correo</th><th>Rol</th><th>Registro</th><th>Acciones</th></tr></thead>
+        <tbody>
+        <tr th:each="u : ${usuarios}">
+            <td th:text="${u.idUsuario}">1</td>
+            <td th:text="${u.nombre}">Nombre</td>
+            <td th:text="${u.correo}">correo</td>
+            <td><span class="rol" th:classappend="'rol-' + ${u.rol}" th:text="${u.rol}">ROL</span></td>
+            <td th:text="${#temporals.format(u.fechaRegistro, 'dd/MM/yyyy')}">fecha</td>
+            <td class="acciones">
+                <a class="boton boton-pequeno" th:href="@{/usuarios/{id}/editar(id=${u.idUsuario})}">Editar</a>
+                <form method="post" th:action="@{/usuarios/{id}/eliminar(id=${u.idUsuario})}"
+                      th:data-confirmar="|¿Eliminar el usuario ${u.correo}?|" onsubmit="return confirm(this.dataset.confirmar)">
+                    <button type="submit" class="boton boton-pequeno boton-peligro">Eliminar</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+<footer th:replace="~{fragmentos :: pie}"></footer>
+</body>
+</html>

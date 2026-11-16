@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: cabeza('Iniciar sesión')}"></head>
+<body>
+<header th:replace="~{fragmentos :: encabezado}"></header>
+<main class="contenido">
+    <th:block th:replace="~{fragmentos :: mensajes}"></th:block>
+    <section class="panel-login">
+        <h1>Iniciar sesión</h1>
+        <p class="ayuda">Ingrese con su correo y contraseña. El formulario se envía con <strong>POST</strong>
+            al controlador <code>LoginControlador</code> de Spring MVC.</p>
+        <form class="formulario" method="post" th:action="@{/login}" autocomplete="off">
+            <label for="correo">Correo electrónico</label>
+            <input type="email" id="correo" name="correo" required maxlength="150"
+                   th:value="${correo}" placeholder="usuario@correo.com">
+            <label for="clave">Contraseña</label>
+            <input type="password" id="clave" name="clave" required placeholder="Mínimo 8 caracteres">
+            <button type="submit" class="boton boton-principal">Ingresar</button>
+        </form>
+    </section>
+</main>
+<footer th:replace="~{fragmentos :: pie}"></footer>
+</body>
+</html>

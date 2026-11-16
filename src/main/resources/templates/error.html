@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<!--/*
+  Página de error. La usan ManejadorErroresWeb (404, 403, 400) y el BasicErrorController de
+  Spring Boot para cualquier otro error. Recibe status, error y message.
+*/-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: cabeza('Error')}"></head>
+<body>
+<header class="barra">
+    <a class="marca" th:href="@{/}"><span class="marca-icono">GP</span><span>Gestión de Pedidos</span></a>
+</header>
+<main class="contenido">
+    <section class="panel-error">
+        <h1 th:text="'Error ' + ${status}">Error</h1>
+        <p><strong th:text="${error}">Descripción</strong></p>
+        <p th:text="${message}">Mensaje</p>
+        <a class="boton boton-principal" th:href="@{/}">Ir al inicio</a>
+    </section>
+</main>
+<footer class="pie"><span>SENA · Análisis y Desarrollo de Software · Ficha 3186691</span></footer>
+</body>
+</html>
