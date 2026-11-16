@@ -5,7 +5,7 @@ Rubén Darío Herrera Beltrán · SENA ADSO ficha 3186691 · Evidencia GA7-22050
 - URL base local: `http://localhost:8080`
 - Formato: JSON (`Content-Type: application/json`). Errores en formato ProblemDetail (RFC 9457): `{"title", "status", "detail", "instance"}`.
 - Autenticación: `POST /api/sesion` devuelve la cookie `JSESSIONID`, que se envía en las demás peticiones.
-- Total: 19 ENDPOINT.
+- Total: 20 ENDPOINT.
 
 ## Sesión
 
@@ -55,6 +55,12 @@ Rubén Darío Herrera Beltrán · SENA ADSO ficha 3186691 · Evidencia GA7-22050
 | # | Método | Ruta | Acceso | Descripción | Cuerpo JSON | Respuestas |
 |---|---|---|---|---|---|---|
 | 19 | `GET` | `/api/resumen` | ADMINISTRADOR, VENDEDOR | Total de productos, stock bajo, usuarios y pedidos por estado | — | 200 · 403 |
+
+## Reportes (v1.3.0)
+
+| # | Método | Ruta | Acceso | Descripción | Cuerpo | Respuestas |
+|---|---|---|---|---|---|---|
+| 20 | `GET` | `/api/reportes/ventas?desde=AAAA-MM-DD&hasta=AAAA-MM-DD` | ADMINISTRADOR, VENDEDOR | Ventas del periodo (por defecto los últimos 30 días): pedidos por estado, subtotal, IVA, total, ticket promedio, 5 productos más vendidos y ventas por cliente | — | 200 · 401 · 403 · 422 |
 
 ## Códigos de estado
 

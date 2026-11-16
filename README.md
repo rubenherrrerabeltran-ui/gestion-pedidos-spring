@@ -1,7 +1,7 @@
 # Sistema de Gestión de Pedidos — Módulo Spring Boot
 
-Evidencias **GA7-220501096-AA3-EV01** (codificación con un framework, v1.0.0) y
-**GA7-220501096-AA3-EV02** (módulo codificado y probado según los requerimientos, v1.1.0).
+Evidencias **GA7-220501096-AA3-EV01** (v1.0.0), **GA7-220501096-AA3-EV02** (v1.1.0), **GA7-220501096-AA5-EV04**
+(v1.2.0, API probada con Postman) y **GA8-220501096-AA1-EV01** (v1.3.0, integración de módulos: reportes).
 SENA · Tecnología en Análisis y Desarrollo de Software · Ficha 3186691 · **Rubén Darío Herrera Beltrán**
 
 Este módulo reescribe el sistema de gestión de pedidos (usuarios, productos, pedidos y detalle de pedido)
@@ -22,6 +22,7 @@ diseño de las vistas y los estilos de AA2-EV02 (Servlets y JSP).
 | RF07 | Detalle del pedido y cambio de estado | `/pedidos/{id}`, `PATCH /api/pedidos/{id}/estado` |
 | RF08 | Seguimiento de pedidos por el cliente | `/pedidos` con rol CLIENTE |
 | RF09 | Gestionar usuarios y roles | `/usuarios` |
+| RF10 | Reporte de ventas por periodo (estados, productos más vendidos, ventas por cliente) y exportación CSV | `/reportes`, `/reportes/pedidos.csv`, `GET /api/reportes/ventas` |
 | RNF01 | Interfaz web y móvil consistente | `estilos.css` (diseño adaptable) |
 
 ## Tecnologías
@@ -34,18 +35,19 @@ diseño de las vistas y los estilos de AA2-EV02 (Servlets y JSP).
 | Negocio | Servicios `@Service` con `@Transactional` |
 | Datos | `JdbcClient` de Spring (`@Repository`) · MySQL 8 (H2 en modo MySQL para demo y pruebas) |
 | Servidor | Tomcat embebido |
-| Pruebas | JUnit 5 sobre la aplicación completa (servicios, vistas y API) |
+| Pruebas | JUnit 5: unitarias (con doble de prueba) e integración (servicios, vistas y API) · cobertura JaCoCo |
 
 ## Estructura
 
 ```
 src/main/java/co/sena/gestionpedidos
 ├── GestionPedidosApplication.java   # @SpringBootApplication (punto de entrada)
-├── config/WebConfig.java            # registra el interceptor de sesión y roles
+├── config/                          # WebConfig (interceptor de sesión y roles) y RelojConfig (zona America/Bogota)
 ├── modelo/                          # Usuario, Producto, Pedido, DetallePedido, Rol, EstadoPedido
 ├── repositorio/                     # interfaces de acceso a datos
 │   └── jdbc/                        # implementaciones con JdbcClient (@Repository)
-├── servicio/                        # reglas de negocio (@Service, @Transactional)
+├── servicio/                        # reglas de negocio (@Service, @Transactional) y ReporteServicio
+│   └── reporte/                     # ReporteVentas, VentaProducto, VentaCliente (records)
 ├── web/controlador/                 # controladores MVC + Thymeleaf
 ├── web/api/                         # API REST (@RestController) y DTO (records)
 ├── web/formulario/                  # objetos de formulario
@@ -100,10 +102,11 @@ Abrir <http://localhost:8080>. Usuarios de prueba:
 | Gestionar usuarios | ✔ | — | — |
 | Registrar pedidos | ✔ (a un cliente) | ✔ (a un cliente) | ✔ (propios) |
 | Cambiar estado de pedidos | ✔ | ✔ | Cancelar los propios pendientes |
+| Reportes de ventas y CSV | ✔ | ✔ | — |
 
 ## API REST
 
-19 ENDPOINT JSON (detalle completo, cuerpos y códigos de respuesta en [`docs/API.md`](docs/API.md)):
+20 ENDPOINT JSON (detalle completo, cuerpos y códigos de respuesta en [`docs/API.md`](docs/API.md)):
 
 | Recurso | ENDPOINT | Acceso |
 |---|---|---|
@@ -114,6 +117,7 @@ Abrir <http://localhost:8080>. Usuarios de prueba:
 | Pedidos | `GET /api/pedidos?cliente=&estado=&desde=&hasta=` · `GET` · `POST` · `PATCH /api/pedidos/{id}/estado` | Con sesión (el cliente solo ve y cancela los suyos) |
 | Usuarios | `GET` · `POST /api/usuarios` · `GET` · `PUT` · `DELETE /api/usuarios/{id}` | ADMINISTRADOR |
 | Indicadores | `GET /api/resumen` | ADMINISTRADOR, VENDEDOR |
+| Reportes | `GET /api/reportes/ventas?desde=&hasta=` | ADMINISTRADOR, VENDEDOR |
 
 Los errores se responden en formato ProblemDetail (RFC 9457) con 400, 401, 403, 404 o 422.
 
@@ -148,12 +152,23 @@ por el formulario.
 ## Pruebas y estándar de codificación
 
 ```bash
-mvn test                                   # 61 pruebas JUnit 5 (validaciones, servicios, vistas y API)
+mvn test                                   # 85 pruebas JUnit 5 (unitarias e integración)
+mvn verify                                 # además genera el JAR y la cobertura en target/site/jacoco/index.html
 java herramientas/VerificadorEstandar.java # verifica las reglas de docs/estandares-codificacion.md
 ```
+
+Resultado v1.3.0: 85 pruebas, 0 fallos; cobertura de instrucciones 86 % y de ramas 77 %.
+
+## Documentación
+
+- [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md): capas, módulos, integración, patrones, seguridad y metodología.
+- [`docs/AMBIENTES.md`](docs/AMBIENTES.md): ambientes de desarrollo y pruebas, servidor, base de datos y perfiles.
+- [`docs/diagramas/`](docs/diagramas/): diagramas de paquetes, componentes, clases y mapa de navegación.
+- [`docs/API.md`](docs/API.md) y [`docs/estandares-codificacion.md`](docs/estandares-codificacion.md).
 
 ## Control de versiones
 
 Commits con el formato *Conventional Commits* (`feat`, `fix`, `test`, `docs`, `chore`, `style`) y etiquetas
-`v1.0.0` (AA3-EV01), `v1.1.0` (AA3-EV02) y `v1.2.0` (AA5-EV04, API completa y pruebas con Postman).
+`v1.0.0` (AA3-EV01), `v1.1.0` (AA3-EV02), `v1.2.0` (AA5-EV04, API completa y pruebas con Postman) y
+`v1.3.0` (GA8-AA1-EV01, módulo de reportes integrado, pruebas unitarias y cobertura).
 Ver `git log --oneline`.

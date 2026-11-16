@@ -1,0 +1,21 @@
+digraph G {
+  graph [rankdir=LR, fontname="Arial", fontsize=13, nodesep=0.25, ranksep=0.55, label="Mapa de navegación - Sistema de Gestión de Pedidos (v1.3.0)", labelloc=t];
+  node [shape=box, style="rounded,filled", fillcolor="#eef6e8", color="#39a900", fontname="Arial", fontsize=10];
+  edge [arrowhead=vee, color="#555555", fontname="Arial", fontsize=8];
+  login [label="Iniciar sesión\n/login", fillcolor="#e1efff", color="#0b4f99"];
+  reg [label="Registro de cliente\n/registro", fillcolor="#e1efff", color="#0b4f99"];
+  ini [label="Tablero (indicadores)\n/", fillcolor="#00324d", fontcolor="white", color="#00324d"];
+  subgraph cluster_p { label="Productos (todos los roles)"; style=rounded; color="#39a900";
+    pl [label="Catálogo\n/productos"]; pn [label="Nuevo / editar *\n/productos/nuevo\n/productos/{id}/editar"]; pe [label="Eliminar **\nPOST /productos/{id}/eliminar"]; }
+  subgraph cluster_pe { label="Pedidos (todos los roles)"; style=rounded; color="#39a900";
+    pdl [label="Lista y filtros\n/pedidos"]; pdn [label="Nuevo pedido\n/pedidos/nuevo"]; pdd [label="Detalle\n/pedidos/{id}"]; pde [label="Cambiar estado * / Cancelar\nPOST /pedidos/{id}/estado"]; }
+  subgraph cluster_r { label="Reportes * (v1.3.0)"; style=rounded; color="#a15c00";
+    rv [label="Reporte de ventas\n/reportes?desde=&hasta=", fillcolor="#fff4d6", color="#a15c00"]; rc [label="Descargar CSV\n/reportes/pedidos.csv", fillcolor="#fff4d6", color="#a15c00"]; }
+  subgraph cluster_u { label="Usuarios **"; style=rounded; color="#39a900";
+    ul [label="Usuarios y roles\n/usuarios"]; un [label="Nuevo / editar\n/usuarios/nuevo\n/usuarios/{id}/editar"]; }
+  salir [label="Cerrar sesión\nPOST /logout", fillcolor="#fde8e8", color="#a32020"];
+  login -> reg [label="crear cuenta"]; reg -> login; login -> ini [label="credenciales válidas"];
+  ini -> pl; ini -> pdl; ini -> rv; ini -> ul; ini -> salir; salir -> login;
+  pl -> pn; pl -> pe; pdl -> pdn; pdl -> pdd; pdn -> pdd [label="guardar"]; pdd -> pde; rv -> rc; ul -> un;
+  nota [shape=note, fillcolor="#ffffff", color="#999999", label="*  ADMINISTRADOR y VENDEDOR\n** solo ADMINISTRADOR\nSin sesión: redirección a /login"];
+}

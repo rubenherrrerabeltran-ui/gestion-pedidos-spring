@@ -1,0 +1,25 @@
+digraph G {
+  graph [rankdir=LR, fontname="Arial", fontsize=13, nodesep=0.3, ranksep=0.6, label="Diagrama de componentes y capas - Sistema de Gestión de Pedidos", labelloc=t];
+  node [shape=component, style=filled, fillcolor="#eef6e8", color="#39a900", fontname="Arial", fontsize=11];
+  edge [arrowhead=vee, color="#444444", fontname="Arial", fontsize=9];
+  nav [label="Navegador web\n(HTML + CSS)", shape=box, style="rounded,filled", fillcolor="#e1efff", color="#0b4f99"];
+  pm [label="Clientes de la API\n(Postman, app móvil)", shape=box, style="rounded,filled", fillcolor="#e1efff", color="#0b4f99"];
+  subgraph cluster_srv { label="Servidor Tomcat 11 embebido · Spring Boot 4.1.1 · Java 21"; style="rounded"; color="#00324d"; fontname="Arial Bold";
+    subgraph cluster_pres { label="Presentación"; style="rounded,filled"; fillcolor="#f5f9fc";
+      seg [label="Seguridad\nSesionInterceptor\n@RequiereRol / @Publico"];
+      web [label="Módulo web MVC\nControladores + Thymeleaf"];
+      api [label="API REST JSON\nControladores + DTO\nProblemDetail"]; }
+    subgraph cluster_neg { label="Negocio"; style="rounded,filled"; fillcolor="#f5f9fc";
+      us [label="Usuarios\nUsuarioServicio"]; pr [label="Productos\nProductoServicio"]; pe [label="Pedidos\nPedidoServicio"]; re [label="Reportes (v1.3.0)\nReporteServicio", fillcolor="#fff4d6", color="#a15c00"];
+      va [label="Validador · ClaveUtil (PBKDF2)"]; }
+    subgraph cluster_dat { label="Datos"; style="rounded,filled"; fillcolor="#f5f9fc";
+      rj [label="Repositorios JDBC\n(JdbcClient de Spring)"]; }
+  }
+  db [label="Base de datos\nMySQL 8 (producción)\nH2 modo MySQL (desarrollo y pruebas)", shape=cylinder, fillcolor="#fde8e8", color="#a32020"];
+  nav -> seg [label="HTTP / cookie JSESSIONID"]; pm -> seg [label="HTTP + JSON"];
+  seg -> web; seg -> api;
+  web -> us; web -> pr; web -> pe; web -> re; api -> us; api -> pr; api -> pe; api -> re;
+  us -> va; pr -> va; pe -> va; re -> va;
+  us -> rj; pr -> rj; pe -> rj; re -> rj [label="PedidoRepositorio"];
+  rj -> db [label="SQL (JDBC)"];
+}

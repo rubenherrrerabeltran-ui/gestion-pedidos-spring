@@ -1,0 +1,15 @@
+digraph G {
+  graph [rankdir=TB, fontname="Arial", fontsize=13, nodesep=0.35, ranksep=0.55, bgcolor="white", label="Diagrama de paquetes - co.sena.gestionpedidos (v1.3.0)", labelloc=t];
+  node [shape=tab, style="filled", fillcolor="#eef6e8", color="#39a900", fontname="Arial", fontsize=11];
+  edge [style=dashed, arrowhead=vee, color="#555555", fontname="Arial", fontsize=9];
+  subgraph cluster_p { label="Capa de presentación"; style="rounded,filled"; fillcolor="#f5f9fc"; color="#00324d"; fontname="Arial Bold";
+    ctrl [label="web.controlador\n(vistas Thymeleaf)"]; api [label="web.api\n(@RestController)"]; dto [label="web.api.dto\n(records JSON)"]; form [label="web.formulario"]; seg [label="web.seguridad\n(interceptor, roles)"]; cfg [label="config\n(WebConfig, RelojConfig)"]; }
+  subgraph cluster_n { label="Capa de negocio"; style="rounded,filled"; fillcolor="#f5f9fc"; color="#00324d"; fontname="Arial Bold";
+    serv [label="servicio\n(@Service, @Transactional)"]; rep [label="servicio.reporte\n(records del reporte)"]; util [label="util\n(Validador, ClaveUtil)"]; exc [label="excepcion"]; }
+  subgraph cluster_d { label="Capa de datos"; style="rounded,filled"; fillcolor="#f5f9fc"; color="#00324d"; fontname="Arial Bold";
+    repo [label="repositorio\n(interfaces)"]; jdbc [label="repositorio.jdbc\n(JdbcClient)"]; }
+  modelo [label="modelo\n(entidades y enums)", fillcolor="#fff4d6", color="#a15c00"];
+  ctrl -> serv; ctrl -> form; ctrl -> seg; api -> serv; api -> dto; cfg -> seg; seg -> serv [label="UsuarioSesion"];
+  serv -> repo; serv -> rep; serv -> util; serv -> exc; jdbc -> repo [style=solid, arrowhead=onormal, label="implementa"];
+  repo -> modelo; serv -> modelo; rep -> modelo; jdbc -> modelo; dto -> modelo; util -> exc;
+}
