@@ -135,3 +135,36 @@ h1 { font-size: 26px; margin: 0 0 6px; }
                              box-shadow: 0 6px 24px rgba(0, 50, 77, .12); }
 .panel-login .boton { margin-top: 18px; padding: 12px; }
 .panel-error { text-align: center; }
+
+/* AA3-EV02: registro, filtros y totales con IVA */
+.centrado { text-align: center; }
+.tarjeta-formulario.centrada { margin: 10px auto; }
+.panel-login .ayuda.centrado { margin-top: 18px; }
+.filtros { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; background: #fff; padding: 14px 16px;
+           border-radius: var(--radio); margin-bottom: 16px; box-shadow: 0 1px 2px rgba(0, 0, 0, .06); }
+.filtros label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; color: var(--texto-suave); }
+.filtros input, .filtros select { padding: 8px 10px; border: 1px solid var(--gris-borde); border-radius: 8px; font: inherit;
+                                  color: var(--texto); min-width: 150px; }
+.tabla tfoot td { padding: 8px 12px; }
+.fila > div { min-width: 0; }
+.fila input { width: 100%; }
+.tabla tfoot .total th, .tabla tfoot .total td { font-size: 16px; }
+
+/* RNF01: diseño adaptable para pantallas de celular (menos de 760 px de ancho) */
+@media (max-width: 760px) {
+    body { font-size: 14px; }
+    .barra { flex-wrap: wrap; gap: 10px; padding: 10px 14px; }
+    .menu { order: 3; width: 100%; overflow-x: auto; }
+    .menu a { padding: 6px 10px; white-space: nowrap; }
+    .sesion { margin-left: auto; gap: 8px; }
+    .sesion > span { display: none; }
+    .contenido { padding: 18px 12px 28px; }
+    .encabezado-pagina { flex-direction: column; align-items: stretch; }
+    .tarjetas { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .fila { grid-template-columns: 1fr; }
+    .tabla { display: block; overflow-x: auto; white-space: nowrap; }
+    .filtros { flex-direction: column; align-items: stretch; }
+    .filtros input, .filtros select { min-width: 0; width: 100%; }
+    .tarjeta-formulario, .panel-login { padding: 18px; margin: 10px 0; }
+    .pie { flex-direction: column; padding: 12px 14px; }
+}
