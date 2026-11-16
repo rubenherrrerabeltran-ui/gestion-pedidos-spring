@@ -1,0 +1,2613 @@
+{
+  "info": {
+    "_postman_id": "1b84a538-b993-572b-a131-109ee186468d",
+    "name": "Gestión de Pedidos - API REST (SENA AA5-EV04)",
+    "description": "Pruebas de la API REST del Sistema de Gestión de Pedidos (Spring Boot 4.1.1).\nAutor: Rubén Darío Herrera Beltrán · SENA ADSO ficha 3186691.\nEjecute la colección completa en orden con el Collection Runner. La variable baseUrl viene del entorno seleccionado.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 · Catálogo público (sin sesión)",
+      "description": "Consultas públicas de productos y errores de acceso sin sesión.",
+      "item": [
+        {
+          "name": "Listar productos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Responde JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"json\"));",
+                  "pm.test(\"Responde en menos de 2 segundos\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Devuelve una lista con al menos 5 productos\", () => {",
+                  "    const lista = pm.response.json();",
+                  "    pm.expect(lista).to.be.an(\"array\");",
+                  "    pm.expect(lista.length).to.be.above(4);",
+                  "});",
+                  "pm.test(\"Cada producto tiene id, nombre, precio, stock y estado\", () => {",
+                  "    pm.response.json().forEach(p => {",
+                  "        [\"idProducto\", \"nombreProducto\", \"precio\", \"stock\", \"activo\"].forEach(c => pm.expect(p).to.have.property(c));",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos"
+              ]
+            },
+            "description": "GET /api/productos — Lista el catálogo. Parámetros opcionales: texto (nombre contiene) y filtro (todos, activos, inactivos, stock-bajo). Acceso público."
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar por nombre",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Todos los resultados contienen «café»\", () => {",
+                  "    pm.response.json().forEach(p => pm.expect(p.nombreProducto.toLowerCase()).to.include(\"café\"));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos?texto=café",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos"
+              ],
+              "query": [
+                {
+                  "key": "texto",
+                  "value": "café"
+                }
+              ]
+            },
+            "description": "GET /api/productos?texto=café — Búsqueda sin distinguir mayúsculas."
+          },
+          "response": []
+        },
+        {
+          "name": "Filtrar stock bajo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Todos tienen menos de 10 unidades\", () => {",
+                  "    const lista = pm.response.json();",
+                  "    pm.expect(lista.length).to.be.above(0);",
+                  "    lista.forEach(p => pm.expect(p.stock).to.be.below(10));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos?filtro=stock-bajo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos"
+              ],
+              "query": [
+                {
+                  "key": "filtro",
+                  "value": "stock-bajo"
+                }
+              ]
+            },
+            "description": "GET /api/productos?filtro=stock-bajo — Alerta de inventario (RF03/RF04)."
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar producto por id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Es el producto 1\", () => {",
+                  "    const p = pm.response.json();",
+                  "    pm.expect(p.idProducto).to.equal(1);",
+                  "    pm.expect(p.nombreProducto).to.equal(\"Café de origen Huila 500 g\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "1"
+              ]
+            },
+            "description": "GET /api/productos/{id} — Consulta un producto."
+          },
+          "response": []
+        },
+        {
+          "name": "Producto inexistente (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"ProblemDetail con el mensaje esperado\", () => {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.status).to.equal(404);",
+                  "    pm.expect(cuerpo.detail).to.include(\"no existe\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/99999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "99999"
+              ]
+            },
+            "description": "Error controlado: 404 Not Found con ProblemDetail (RFC 9457)."
+          },
+          "response": []
+        },
+        {
+          "name": "Id no numérico (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"ProblemDetail con el mensaje esperado\", () => {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.status).to.equal(400);",
+                  "    pm.expect(cuerpo.detail).to.include(\"no es válido\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "abc"
+              ]
+            },
+            "description": "Error controlado: 400 Bad Request cuando el id no es un número."
+          },
+          "response": []
+        },
+        {
+          "name": "Filtro inexistente (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"ProblemDetail con el mensaje esperado\", () => {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.status).to.equal(422);",
+                  "    pm.expect(cuerpo.detail).to.include(\"no existe\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos?filtro=agotados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos"
+              ],
+              "query": [
+                {
+                  "key": "filtro",
+                  "value": "agotados"
+                }
+              ]
+            },
+            "description": "Validación del parámetro filtro."
+          },
+          "response": []
+        },
+        {
+          "name": "Crear producto sin sesión (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Indica cómo iniciar sesión\", () => pm.expect(pm.response.json().detail).to.include(\"/api/sesion\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos"
+              ]
+            },
+            "description": "El interceptor de seguridad rechaza la operación sin sesión.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreProducto\": \"Té verde\",\n  \"precio\": 12500,\n  \"stock\": 14\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 · Sesión y productos (VENDEDOR)",
+      "description": "Inicio de sesión y CRUD de productos con validaciones.",
+      "item": [
+        {
+          "name": "Login con clave incorrecta (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"ProblemDetail con el mensaje esperado\", () => {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.status).to.equal(422);",
+                  "    pm.expect(cuerpo.detail).to.include(\"Correo o contraseña incorrectos\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sesion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sesion"
+              ]
+            },
+            "description": "Mensaje genérico: no revela si falló el correo o la clave.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"laura.vendedora@gestionpedidos.local\",\n  \"clave\": \"Equivocada1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login vendedora",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Responde JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"json\"));",
+                  "pm.test(\"Rol VENDEDOR y sin contraseña en la respuesta\", () => {",
+                  "    const u = pm.response.json();",
+                  "    pm.expect(u.rol).to.equal(\"VENDEDOR\");",
+                  "    pm.expect(u).to.not.have.property(\"clave\");",
+                  "    pm.expect(u).to.not.have.property(\"passwordHash\");",
+                  "});",
+                  "pm.test(\"El servidor envía la cookie de sesión JSESSIONID\", () => pm.expect(pm.response.headers.get(\"Set-Cookie\")).to.include(\"JSESSIONID\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sesion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sesion"
+              ]
+            },
+            "description": "POST /api/sesion — Inicia sesión. La cookie JSESSIONID se envía en las siguientes peticiones.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"laura.vendedora@gestionpedidos.local\",\n  \"clave\": \"Vendedor2026*\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Sesión actual",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Usuario de la sesión: Laura Gómez\", () => pm.expect(pm.response.json().nombre).to.equal(\"Laura Gómez\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sesion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sesion"
+              ]
+            },
+            "description": "GET /api/sesion — Usuario autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Crear producto",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"sufijo\", String(Date.now()).slice(-6));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 201 Created\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Cabecera Location con la URL del recurso\", () => pm.expect(pm.response.headers.get(\"Location\")).to.match(/^\\/api\\/productos\\/\\d+$/));",
+                  "pm.test(\"Devuelve el producto con id generado\", () => {",
+                  "    const p = pm.response.json();",
+                  "    pm.expect(p.idProducto).to.be.a(\"number\");",
+                  "    pm.expect(p.stock).to.equal(14);",
+                  "    pm.collectionVariables.set(\"idProducto\", p.idProducto);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos"
+              ]
+            },
+            "description": "POST /api/productos — Crea un producto (ADMINISTRADOR o VENDEDOR). Guarda el id en la variable idProducto.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreProducto\": \"Té verde x 20 ({{sufijo}})\",\n  \"precio\": 12500,\n  \"stock\": 14,\n  \"activo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear producto con código HTML (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"ProblemDetail con el mensaje esperado\", () => {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.status).to.equal(422);",
+                  "    pm.expect(cuerpo.detail).to.include(\"caracteres no permitidos\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos"
+              ]
+            },
+            "description": "Validación de caracteres especiales (prevención de XSS).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreProducto\": \"<script>alert('x')</script>\",\n  \"precio\": 1000,\n  \"stock\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear producto con precio negativo (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"ProblemDetail con el mensaje esperado\", () => {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.status).to.equal(422);",
+                  "    pm.expect(cuerpo.detail).to.include(\"mayor que cero\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos"
+              ]
+            },
+            "description": "Validación numérica del precio.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreProducto\": \"Producto de prueba\",\n  \"precio\": -5,\n  \"stock\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear producto con tres decimales (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"ProblemDetail con el mensaje esperado\", () => {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.status).to.equal(422);",
+                  "    pm.expect(cuerpo.detail).to.include(\"dos decimales\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos"
+              ]
+            },
+            "description": "Validación de decimales.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreProducto\": \"Producto de prueba\",\n  \"precio\": 1000.555,\n  \"stock\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "JSON mal formado (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"ProblemDetail con el mensaje esperado\", () => {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.status).to.equal(400);",
+                  "    pm.expect(cuerpo.detail).to.include(\"JSON no es válido\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos"
+              ]
+            },
+            "description": "El cuerpo no es JSON válido.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nombreProducto\": \"Producto\", \"precio\": }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar producto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Precio y stock actualizados\", () => {",
+                  "    const p = pm.response.json();",
+                  "    pm.expect(p.precio).to.equal(13000);",
+                  "    pm.expect(p.stock).to.equal(12);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/{{idProducto}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "{{idProducto}}"
+              ]
+            },
+            "description": "PUT /api/productos/{id} — Actualiza un producto.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreProducto\": \"Té verde x 25 ({{sufijo}})\",\n  \"precio\": 13000,\n  \"stock\": 12,\n  \"activo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar producto como vendedor (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 403\", () => pm.response.to.have.status(403));",
+                  "pm.test(\"ProblemDetail con el mensaje esperado\", () => {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.status).to.equal(403);",
+                  "    pm.expect(cuerpo.detail).to.include(\"no tiene permiso\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/{{idProducto}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "{{idProducto}}"
+              ]
+            },
+            "description": "Solo el ADMINISTRADOR elimina productos."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 · Pedidos, resumen y estados (VENDEDOR)",
+      "description": "Registro, consulta, filtros y cambio de estado de pedidos.",
+      "item": [
+        {
+          "name": "Registrar pedido para un cliente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 201 Created\", () => pm.response.to.have.status(201));",
+                  "const pedido = pm.response.json();",
+                  "pm.collectionVariables.set(\"idPedido\", pedido.idPedido);",
+                  "pm.test(\"Queda en estado PENDIENTE con 2 productos\", () => {",
+                  "    pm.expect(pedido.estado).to.equal(\"PENDIENTE\");",
+                  "    pm.expect(pedido.detalles.length).to.equal(2);",
+                  "});",
+                  "pm.test(\"Subtotal = suma de cantidad × precio\", () => {",
+                  "    const suma = pedido.detalles.reduce((t, d) => t + d.cantidad * d.precioUnitario, 0);",
+                  "    pm.expect(pedido.subtotal).to.equal(suma);",
+                  "});",
+                  "pm.test(\"IVA del 19 % y total = subtotal + IVA\", () => {",
+                  "    pm.expect(pedido.iva).to.equal(Math.round(pedido.subtotal * 0.19));",
+                  "    pm.expect(pedido.total).to.equal(pedido.subtotal + pedido.iva);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pedidos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pedidos"
+              ]
+            },
+            "description": "POST /api/pedidos — Registra un pedido (RF05). El precio lo fija el servidor y el stock se descuenta en una transacción.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": 3,\n  \"items\": [\n    {\n      \"idProducto\": {{idProducto}},\n      \"cantidad\": 2\n    },\n    {\n      \"idProducto\": 1,\n      \"cantidad\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Pedido sin stock suficiente (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"ProblemDetail con el mensaje esperado\", () => {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.status).to.equal(422);",
+                  "    pm.expect(cuerpo.detail).to.include(\"Stock insuficiente\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pedidos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pedidos"
+              ]
+            },
+            "description": "Regla de negocio: no se vende más de lo disponible; la transacción se revierte.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": 3,\n  \"items\": [\n    {\n      \"idProducto\": {{idProducto}},\n      \"cantidad\": 500\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar pedido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Es el pedido registrado y pertenece a Carlos Ramírez\", () => {",
+                  "    const p = pm.response.json();",
+                  "    pm.expect(p.idPedido).to.equal(Number(pm.collectionVariables.get(\"idPedido\")));",
+                  "    pm.expect(p.nombreCliente).to.equal(\"Carlos Ramírez\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pedidos/{{idPedido}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pedidos",
+                "{{idPedido}}"
+              ]
+            },
+            "description": "GET /api/pedidos/{id} — Detalle del pedido con subtotal, IVA y total (RF07)."
+          },
+          "response": []
+        },
+        {
+          "name": "Filtrar pedidos por estado y fecha",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Todos los pedidos están PENDIENTES\", () => {",
+                  "    const lista = pm.response.json();",
+                  "    pm.expect(lista.length).to.be.above(0);",
+                  "    lista.forEach(p => pm.expect(p.estado).to.equal(\"PENDIENTE\"));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pedidos?estado=PENDIENTE&desde=2026-11-01",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pedidos"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "PENDIENTE"
+                },
+                {
+                  "key": "desde",
+                  "value": "2026-11-01"
+                }
+              ]
+            },
+            "description": "GET /api/pedidos?cliente=&estado=&desde=&hasta= — Filtros de RF06."
+          },
+          "response": []
+        },
+        {
+          "name": "Filtro con fecha inexistente (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"ProblemDetail con el mensaje esperado\", () => {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.status).to.equal(422);",
+                  "    pm.expect(cuerpo.detail).to.include(\"no es válida\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pedidos?desde=2026-02-30",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pedidos"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "2026-02-30"
+                }
+              ]
+            },
+            "description": "Validación de fechas: el 30 de febrero no existe."
+          },
+          "response": []
+        },
+        {
+          "name": "Filtro con rango invertido (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"ProblemDetail con el mensaje esperado\", () => {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.status).to.equal(422);",
+                  "    pm.expect(cuerpo.detail).to.include(\"no puede ser posterior\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pedidos?desde=2026-11-15&hasta=2026-11-01",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pedidos"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "2026-11-15"
+                },
+                {
+                  "key": "hasta",
+                  "value": "2026-11-01"
+                }
+              ]
+            },
+            "description": "Validación de fechas: la fecha inicial no puede ser posterior a la final."
+          },
+          "response": []
+        },
+        {
+          "name": "Marcar pedido como PAGADO",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"El estado cambió a PAGADO\", () => pm.expect(pm.response.json().estado).to.equal(\"PAGADO\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pedidos/{{idPedido}}/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pedidos",
+                "{{idPedido}}",
+                "estado"
+              ]
+            },
+            "description": "PATCH /api/pedidos/{id}/estado — Cambio de estado (RF07).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"PAGADO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Transición no permitida (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"ProblemDetail con el mensaje esperado\", () => {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.status).to.equal(422);",
+                  "    pm.expect(cuerpo.detail).to.include(\"No se puede pasar\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pedidos/{{idPedido}}/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pedidos",
+                "{{idPedido}}",
+                "estado"
+              ]
+            },
+            "description": "Un pedido PAGADO no puede volver a PENDIENTE.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"PENDIENTE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Resumen de indicadores",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Incluye productos, stock bajo, usuarios y pedidos por estado\", () => {",
+                  "    const r = pm.response.json();",
+                  "    [\"totalProductos\", \"productosStockBajo\", \"totalUsuarios\", \"pedidosPorEstado\"].forEach(c => pm.expect(r).to.have.property(c));",
+                  "    pm.expect(r.pedidosPorEstado).to.have.property(\"PAGADO\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/resumen",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "resumen"
+              ]
+            },
+            "description": "GET /api/resumen — Indicadores del tablero (RF03)."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar usuarios como vendedor (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 403\", () => pm.response.to.have.status(403));",
+                  "pm.test(\"ProblemDetail con el mensaje esperado\", () => {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.status).to.equal(403);",
+                  "    pm.expect(cuerpo.detail).to.include(\"no tiene permiso\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios"
+              ]
+            },
+            "description": "El módulo de usuarios es exclusivo del ADMINISTRADOR."
+          },
+          "response": []
+        },
+        {
+          "name": "Cerrar sesión",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 204 No Content\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sesion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sesion"
+              ]
+            },
+            "description": "DELETE /api/sesion — Cierra la sesión."
+          },
+          "response": []
+        },
+        {
+          "name": "Sesión cerrada (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sesion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sesion"
+              ]
+            },
+            "description": "Después de cerrar sesión ya no hay usuario autenticado."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 · Registro y pedidos del CLIENTE",
+      "description": "Registro público, pedidos propios y cancelación.",
+      "item": [
+        {
+          "name": "Registro con datos inválidos (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"ProblemDetail con el mensaje esperado\", () => {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.status).to.equal(422);",
+                  "    pm.expect(cuerpo.detail).to.include(\"solo admite letras\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clientes"
+              ]
+            },
+            "description": "Validación de textos y caracteres especiales en el registro.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Juan123 $\",\n  \"documento\": \"10.324.567\",\n  \"correo\": \"juan@correo\",\n  \"telefono\": \"300\",\n  \"clave\": \"abc\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Registro con documento inválido (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"ProblemDetail con el mensaje esperado\", () => {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.status).to.equal(422);",
+                  "    pm.expect(cuerpo.detail).to.include(\"entre 6 y 10 dígitos\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clientes"
+              ]
+            },
+            "description": "Validación numérica del documento.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Juan Pérez\",\n  \"documento\": \"10.324.567\",\n  \"correo\": \"juan@correo.com\",\n  \"telefono\": \"3001234567\",\n  \"clave\": \"Juan2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar cliente",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"sufijoDoc\", String(Date.now()).slice(-8));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 201 Created\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Se crea con rol CLIENTE aunque se envíe otro rol\", () => pm.expect(pm.response.json().rol).to.equal(\"CLIENTE\"));",
+                  "pm.test(\"La respuesta no incluye la contraseña\", () => pm.expect(pm.response.text()).to.not.include(\"Sofia2026\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clientes"
+              ]
+            },
+            "description": "POST /api/clientes — Registro público de clientes (RF02).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Sofía Martínez\",\n  \"documento\": \"10{{sufijoDoc}}\",\n  \"correo\": \"sofia{{sufijoDoc}}@correo.com\",\n  \"telefono\": \"3157654321\",\n  \"clave\": \"Sofia2026\",\n  \"rol\": \"ADMINISTRADOR\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login del cliente nuevo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Rol CLIENTE\", () => pm.expect(pm.response.json().rol).to.equal(\"CLIENTE\"));",
+                  "pm.collectionVariables.set(\"idCliente\", pm.response.json().idUsuario);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sesion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sesion"
+              ]
+            },
+            "description": "El cliente recién registrado inicia sesión.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"sofia{{sufijoDoc}}@correo.com\",\n  \"clave\": \"Sofia2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cliente registra su pedido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"El pedido queda a nombre del cliente de la sesión\", () => {",
+                  "    const p = pm.response.json();",
+                  "    pm.expect(p.idCliente).to.equal(Number(pm.collectionVariables.get(\"idCliente\")));",
+                  "    pm.collectionVariables.set(\"idPedidoCliente\", p.idPedido);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pedidos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pedidos"
+              ]
+            },
+            "description": "El cliente no envía idCliente: el servidor usa el de la sesión.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"idProducto\": 2,\n      \"cantidad\": 2\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mis pedidos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Solo aparecen pedidos del cliente\", () => {",
+                  "    const id = Number(pm.collectionVariables.get(\"idCliente\"));",
+                  "    pm.response.json().forEach(p => pm.expect(p.idCliente).to.equal(id));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pedidos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pedidos"
+              ]
+            },
+            "description": "Seguimiento de pedidos (RF08)."
+          },
+          "response": []
+        },
+        {
+          "name": "Ver pedido de otro cliente (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 403\", () => pm.response.to.have.status(403));",
+                  "pm.test(\"ProblemDetail con el mensaje esperado\", () => {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.status).to.equal(403);",
+                  "    pm.expect(cuerpo.detail).to.include(\"pertenece a otro cliente\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pedidos/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pedidos",
+                "1"
+              ]
+            },
+            "description": "Un cliente no puede ver pedidos ajenos."
+          },
+          "response": []
+        },
+        {
+          "name": "Cliente intenta marcar PAGADO (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 403\", () => pm.response.to.have.status(403));",
+                  "pm.test(\"ProblemDetail con el mensaje esperado\", () => {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.status).to.equal(403);",
+                  "    pm.expect(cuerpo.detail).to.include(\"solo puede cancelar\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pedidos/{{idPedidoCliente}}/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pedidos",
+                "{{idPedidoCliente}}",
+                "estado"
+              ]
+            },
+            "description": "El cliente solo puede cancelar.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"PAGADO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cliente cancela su pedido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"El pedido quedó CANCELADO\", () => pm.expect(pm.response.json().estado).to.equal(\"CANCELADO\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pedidos/{{idPedidoCliente}}/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pedidos",
+                "{{idPedidoCliente}}",
+                "estado"
+              ]
+            },
+            "description": "Cancelación: las unidades vuelven al inventario.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"CANCELADO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cerrar sesión del cliente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sesion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sesion"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05 · Usuarios y eliminación (ADMINISTRADOR)",
+      "description": "Gestión de usuarios y roles y eliminación de productos.",
+      "item": [
+        {
+          "name": "Login administrador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Rol ADMINISTRADOR\", () => pm.expect(pm.response.json().rol).to.equal(\"ADMINISTRADOR\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sesion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sesion"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"admin@gestionpedidos.local\",\n  \"clave\": \"Admin2026*\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar usuarios",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Cada usuario tiene documento, teléfono y rol, sin hash de contraseña\", () => {",
+                  "    const lista = pm.response.json();",
+                  "    pm.expect(lista.length).to.be.above(2);",
+                  "    lista.forEach(u => {",
+                  "        [\"idUsuario\", \"nombre\", \"documento\", \"correo\", \"telefono\", \"rol\"].forEach(c => pm.expect(u).to.have.property(c));",
+                  "        pm.expect(u).to.not.have.property(\"passwordHash\");",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios"
+              ]
+            },
+            "description": "GET /api/usuarios — Lista de usuarios (RF09)."
+          },
+          "response": []
+        },
+        {
+          "name": "Crear usuario vendedor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Rol convertido a VENDEDOR\", () => {",
+                  "    const u = pm.response.json();",
+                  "    pm.expect(u.rol).to.equal(\"VENDEDOR\");",
+                  "    pm.collectionVariables.set(\"idUsuarioNuevo\", u.idUsuario);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios"
+              ]
+            },
+            "description": "POST /api/usuarios — Crea un usuario con rol.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Jorge Lara\",\n  \"documento\": \"11{{sufijoDoc}}\",\n  \"correo\": \"jorge{{sufijoDoc}}@correo.com\",\n  \"telefono\": \"3014445566\",\n  \"clave\": \"Jorge2026\",\n  \"rol\": \"vendedor\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear usuario con rol inválido (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"ProblemDetail con el mensaje esperado\", () => {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.status).to.equal(422);",
+                  "    pm.expect(cuerpo.detail).to.include(\"no existe\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios"
+              ]
+            },
+            "description": "Validación del rol.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Pedro Gil\",\n  \"documento\": \"12{{sufijoDoc}}\",\n  \"correo\": \"pedro{{sufijoDoc}}@correo.com\",\n  \"telefono\": \"3014445566\",\n  \"clave\": \"Pedro2026\",\n  \"rol\": \"GERENTE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear usuario con correo repetido (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"ProblemDetail con el mensaje esperado\", () => {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.status).to.equal(422);",
+                  "    pm.expect(cuerpo.detail).to.include(\"Ya existe un usuario\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios"
+              ]
+            },
+            "description": "El correo es único.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Otro Admin\",\n  \"documento\": \"13{{sufijoDoc}}\",\n  \"correo\": \"admin@gestionpedidos.local\",\n  \"telefono\": \"3014445566\",\n  \"clave\": \"Admin2026\",\n  \"rol\": \"ADMINISTRADOR\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Es Jorge Lara\", () => pm.expect(pm.response.json().nombre).to.equal(\"Jorge Lara\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/{{idUsuarioNuevo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "{{idUsuarioNuevo}}"
+              ]
+            },
+            "description": "GET /api/usuarios/{id}"
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Nombre y teléfono actualizados\", () => {",
+                  "    const u = pm.response.json();",
+                  "    pm.expect(u.nombre).to.equal(\"Jorge Iván Lara\");",
+                  "    pm.expect(u.telefono).to.equal(\"3014445599\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/{{idUsuarioNuevo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "{{idUsuarioNuevo}}"
+              ]
+            },
+            "description": "PUT /api/usuarios/{id} — La clave es opcional al actualizar.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Jorge Iván Lara\",\n  \"documento\": \"11{{sufijoDoc}}\",\n  \"correo\": \"jorge{{sufijoDoc}}@correo.com\",\n  \"telefono\": \"3014445599\",\n  \"rol\": \"VENDEDOR\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/{{idUsuarioNuevo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "{{idUsuarioNuevo}}"
+              ]
+            },
+            "description": "DELETE /api/usuarios/{id}"
+          },
+          "response": []
+        },
+        {
+          "name": "Usuario eliminado (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"ProblemDetail con el mensaje esperado\", () => {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.status).to.equal(404);",
+                  "    pm.expect(cuerpo.detail).to.include(\"no existe\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/{{idUsuarioNuevo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "{{idUsuarioNuevo}}"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminarse a sí mismo (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"ProblemDetail con el mensaje esperado\", () => {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.status).to.equal(422);",
+                  "    pm.expect(cuerpo.detail).to.include(\"No puede eliminar el usuario con el que inició sesión\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "1"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar producto con pedidos (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"ProblemDetail con el mensaje esperado\", () => {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.status).to.equal(422);",
+                  "    pm.expect(cuerpo.detail).to.include(\"márquelo como inactivo\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/{{idProducto}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "{{idProducto}}"
+              ]
+            },
+            "description": "La llave foránea impide borrar productos vendidos."
+          },
+          "response": []
+        },
+        {
+          "name": "Crear producto temporal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"idTemporal\", pm.response.json().idProducto);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreProducto\": \"Producto temporal {{sufijo}}\",\n  \"precio\": 1000,\n  \"stock\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar producto temporal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/{{idTemporal}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "{{idTemporal}}"
+              ]
+            },
+            "description": "DELETE /api/productos/{id} (ADMINISTRADOR)."
+          },
+          "response": []
+        },
+        {
+          "name": "Cerrar sesión del administrador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de estado 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sesion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sesion"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "sufijo",
+      "value": ""
+    },
+    {
+      "key": "sufijoDoc",
+      "value": ""
+    },
+    {
+      "key": "idProducto",
+      "value": ""
+    },
+    {
+      "key": "idPedido",
+      "value": ""
+    },
+    {
+      "key": "idCliente",
+      "value": ""
+    },
+    {
+      "key": "idPedidoCliente",
+      "value": ""
+    },
+    {
+      "key": "idUsuarioNuevo",
+      "value": ""
+    },
+    {
+      "key": "idTemporal",
+      "value": ""
+    }
+  ]
+}
