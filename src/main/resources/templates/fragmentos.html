@@ -22,6 +22,8 @@
             <a th:href="@{/}" th:classappend="${rutaActual == '/' or rutaActual == '/inicio'} ? 'activo'">Inicio</a>
             <a th:href="@{/productos}" th:classappend="${#strings.startsWith(rutaActual, '/productos')} ? 'activo'">Productos</a>
             <a th:href="@{/pedidos}" th:classappend="${#strings.startsWith(rutaActual, '/pedidos')} ? 'activo'">Pedidos</a>
+            <a th:if="${usuarioActual.rol.name() != 'CLIENTE'}" th:href="@{/reportes}"
+               th:classappend="${#strings.startsWith(rutaActual, '/reportes')} ? 'activo'">Reportes</a>
             <a th:if="${usuarioActual.rol.name() == 'ADMINISTRADOR'}" th:href="@{/usuarios}"
                th:classappend="${#strings.startsWith(rutaActual, '/usuarios')} ? 'activo'">Usuarios</a>
         </nav>

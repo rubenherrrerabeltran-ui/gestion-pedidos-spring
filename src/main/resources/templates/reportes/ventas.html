@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: cabeza('Reportes')}"></head>
+<body>
+<header th:replace="~{fragmentos :: encabezado}"></header>
+<main class="contenido">
+    <th:block th:replace="~{fragmentos :: mensajes}"></th:block>
+    <section class="encabezado-pagina">
+        <div>
+            <h1>Reporte de ventas</h1>
+            <p class="ayuda">Integra pedidos, productos y clientes. Solo los pedidos PAGADO y ENVIADO cuentan como venta.
+                Periodo: <strong th:text="${#temporals.format(reporte.desde, 'dd/MM/yyyy')} + ' a ' + ${#temporals.format(reporte.hasta, 'dd/MM/yyyy')}">periodo</strong></p>
+        </div>
+        <a class="boton" th:href="@{/reportes/pedidos.csv(desde=${reporte.desde}, hasta=${reporte.hasta})}">Descargar CSV</a>
+    </section>
+
+    <form class="buscador" method="get" th:action="@{/reportes}">
+        <label class="en-linea">Desde <input type="date" name="desde" th:value="${reporte.desde}" th:max="${hoy}"></label>
+        <label class="en-linea">Hasta <input type="date" name="hasta" th:value="${reporte.hasta}" th:max="${hoy}"></label>
+        <button type="submit" class="boton boton-principal">Generar</button>
+        <a class="boton boton-claro" th:href="@{/reportes}">Últimos 30 días</a>
+    </form>
+
+    <section class="tarjetas">
+        <div class="tarjeta">
+            <span class="tarjeta-titulo">Total vendido (IVA incl.)</span>
+            <strong class="tarjeta-valor" th:text="'$ ' + ${#numbers.formatDecimal(reporte.total, 1, 'POINT', 0, 'COMMA')}">0</strong>
+            <span class="tarjeta-detalle" th:text="'Subtotal $ ' + ${#numbers.formatDecimal(reporte.subtotal, 1, 'POINT', 0, 'COMMA')} + ' + IVA $ ' + ${#numbers.formatDecimal(reporte.iva, 1, 'POINT', 0, 'COMMA')}">detalle</span>
+        </div>
+        <div class="tarjeta">
+            <span class="tarjeta-titulo">Pedidos vendidos</span>
+            <strong class="tarjeta-valor" th:text="${reporte.pedidosVendidos} + ' de ' + ${reporte.pedidosEnPeriodo}">0</strong>
+            <span class="tarjeta-detalle">Pagados o enviados / registrados en el periodo</span>
+        </div>
+        <div class="tarjeta">
+            <span class="tarjeta-titulo">Ticket promedio</span>
+            <strong class="tarjeta-valor" th:text="'$ ' + ${#numbers.formatDecimal(reporte.ticketPromedio, 1, 'POINT', 0, 'COMMA')}">0</strong>
+            <span class="tarjeta-detalle">Total vendido / pedidos vendidos</span>
+        </div>
+        <div class="tarjeta">
+            <span class="tarjeta-titulo">Pedidos por estado</span>
+            <span class="tarjeta-detalle" th:each="conteo : ${reporte.pedidosPorEstado}">
+                <span class="estado" th:classappend="'estado-' + ${conteo.key.codigoBd}" th:text="${conteo.key}">ESTADO</span>
+                <strong th:text="${conteo.value}">0</strong>
+            </span>
+        </div>
+    </section>
+
+    <h2>Productos más vendidos</h2>
+    <table class="tabla">
+        <thead><tr><th>#</th><th>Producto</th><th class="num">Unidades</th><th class="num">Vendido (sin IVA)</th></tr></thead>
+        <tbody>
+        <tr th:each="p, i : ${reporte.productosMasVendidos}">
+            <td th:text="${i.count}">1</td>
+            <td th:text="${p.nombreProducto}">Producto</td>
+            <td class="num" th:text="${p.unidades}">0</td>
+            <td class="num" th:text="'$ ' + ${#numbers.formatDecimal(p.total, 1, 'POINT', 0, 'COMMA')}">0</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(reporte.productosMasVendidos)}"><td colspan="4" class="vacio">No hay ventas en el periodo.</td></tr>
+        </tbody>
+    </table>
+
+    <h2>Ventas por cliente</h2>
+    <table class="tabla">
+        <thead><tr><th>Cliente</th><th class="num">Pedidos</th><th class="num">Total (IVA incl.)</th></tr></thead>
+        <tbody>
+        <tr th:each="c : ${reporte.ventasPorCliente}">
+            <td th:text="${c.nombreCliente}">Cliente</td>
+            <td class="num" th:text="${c.pedidos}">0</td>
+            <td class="num" th:text="'$ ' + ${#numbers.formatDecimal(c.total, 1, 'POINT', 0, 'COMMA')}">0</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(reporte.ventasPorCliente)}"><td colspan="3" class="vacio">No hay ventas en el periodo.</td></tr>
+        </tbody>
+    </table>
+</main>
+<footer th:replace="~{fragmentos :: pie}"></footer>
+</body>
+</html>
