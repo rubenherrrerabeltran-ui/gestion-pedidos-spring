@@ -8,7 +8,7 @@
     <section class="encabezado-pagina">
         <div>
             <h1>Productos</h1>
-            <p class="ayuda">Inventario leído de MySQL con <code>JdbcClient</code>. La búsqueda usa
+            <p class="ayuda">Inventario leído de la base de datos con <code>JdbcClient</code>. La búsqueda usa
                 <strong>GET</strong> (<code>?texto=...</code>) porque solo consulta datos.</p>
         </div>
         <a class="boton boton-principal" th:if="${usuarioActual.rol.name() != 'CLIENTE'}"

@@ -15,23 +15,32 @@
 
     <!--/* Tarjetas de indicadores calculados por los servicios de Spring */-->
     <section class="tarjetas">
-        <a class="tarjeta" th:href="@{/productos}">
+        <div class="tarjeta">
             <span class="tarjeta-titulo">Productos</span>
-            <span class="tarjeta-valor" th:text="${totalProductos}">0</span>
+            <strong class="tarjeta-valor" th:text="${totalProductos}">0</strong>
             <span class="tarjeta-detalle" th:text="${productosStockBajo} + ' con stock bajo (menos de 10)'">detalle</span>
-        </a>
-        <a class="tarjeta" th:href="@{/pedidos}">
+            <a class="tarjeta-enlace" th:href="@{/productos}">Ver detalle &rarr;</a>
+        </div>
+        <div class="tarjeta">
             <span class="tarjeta-titulo">Pedidos pendientes</span>
-            <span class="tarjeta-valor" th:text="${conteoPedidos['PENDIENTE']}">0</span>
-            <span class="tarjeta-detalle"
-                  th:text="${conteoPedidos['PAGADO']} + ' pagados · '
-                           + ${conteoPedidos['ENVIADO']} + ' enviados'">detalle</span>
-        </a>
-        <a class="tarjeta" th:href="${usuarioActual.rol.name() == 'ADMINISTRADOR'} ? @{/usuarios} : @{/}">
+            <strong class="tarjeta-valor" th:text="${conteoPedidos['PENDIENTE']}">0</strong>
+            <span class="tarjeta-detalle">Por pagar o cancelar</span>
+            <a class="tarjeta-enlace" th:href="@{/pedidos}">Ver detalle &rarr;</a>
+        </div>
+        <div class="tarjeta">
+            <span class="tarjeta-titulo">Pedidos pagados / enviados</span>
+            <strong class="tarjeta-valor"
+                    th:text="${conteoPedidos['PAGADO']} + ' / ' + ${conteoPedidos['ENVIADO']}">0 / 0</strong>
+            <span class="tarjeta-detalle" th:text="${conteoPedidos['CANCELADO']} + ' cancelado(s)'">detalle</span>
+            <a class="tarjeta-enlace" th:href="@{/pedidos}">Ver detalle &rarr;</a>
+        </div>
+        <div class="tarjeta">
             <span class="tarjeta-titulo">Usuarios</span>
-            <span class="tarjeta-valor" th:text="${totalUsuarios}">0</span>
+            <strong class="tarjeta-valor" th:text="${totalUsuarios}">0</strong>
             <span class="tarjeta-detalle">Administradores, vendedores y clientes</span>
-        </a>
+            <a class="tarjeta-enlace" th:if="${usuarioActual.rol.name() == 'ADMINISTRADOR'}"
+               th:href="@{/usuarios}">Ver detalle &rarr;</a>
+        </div>
     </section>
 
     <section class="accesos">
