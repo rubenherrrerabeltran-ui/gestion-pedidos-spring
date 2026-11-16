@@ -62,7 +62,8 @@ src/main/resources
 
 ## Ejecutar
 
-Requisitos: JDK 21 y Maven 3.9 (o el IDE: NetBeans, IntelliJ, VS Code).
+Requisitos: JDK 21. Maven no es obligatorio: el proyecto trae Maven Wrapper (`mvnw` / `mvnw.cmd`), que lo descarga solo.
+En Windows reemplace `mvn` por `mvnw.cmd` en los comandos siguientes.
 
 **Con MySQL** (la base `sena_gestion_pedidos` se crea sola y las tablas y datos se cargan al iniciar):
 
@@ -102,16 +103,25 @@ Abrir <http://localhost:8080>. Usuarios de prueba:
 
 ## API REST
 
-| Método y ruta | Descripción | Acceso |
+19 ENDPOINT JSON (detalle completo, cuerpos y códigos de respuesta en [`docs/API.md`](docs/API.md)):
+
+| Recurso | ENDPOINT | Acceso |
 |---|---|---|
-| `POST /api/sesion` | Inicia sesión (`{"correo","clave"}`) | Público |
-| `GET /api/sesion` · `DELETE /api/sesion` | Usuario actual · cerrar sesión | Con sesión |
-| `GET /api/productos?texto=` · `GET /api/productos/{id}` | Catálogo | Público |
-| `POST /api/productos` · `PUT /api/productos/{id}` | Crear (201 + Location) · actualizar | ADMINISTRADOR, VENDEDOR |
-| `DELETE /api/productos/{id}` | Eliminar (204) | ADMINISTRADOR |
-| `GET /api/pedidos` · `GET /api/pedidos/{id}` | Pedidos (el cliente solo ve los suyos) | Con sesión |
-| `POST /api/pedidos` | Registrar (`{"idCliente","items":[{"idProducto","cantidad"}]}`) | Con sesión |
-| `PATCH /api/pedidos/{id}/estado` | Cambiar estado (`{"estado":"PAGADO"}`) | ADMINISTRADOR, VENDEDOR |
+| Sesión | `POST` · `GET` · `DELETE /api/sesion` | Público para iniciar |
+| Clientes | `POST /api/clientes` (registro) | Público |
+| Productos | `GET /api/productos?texto=&filtro=` · `GET /api/productos/{id}` | Público |
+| | `POST /api/productos` · `PUT /api/productos/{id}` · `DELETE /api/productos/{id}` | ADMINISTRADOR, VENDEDOR (eliminar: ADMINISTRADOR) |
+| Pedidos | `GET /api/pedidos?cliente=&estado=&desde=&hasta=` · `GET` · `POST` · `PATCH /api/pedidos/{id}/estado` | Con sesión (el cliente solo ve y cancela los suyos) |
+| Usuarios | `GET` · `POST /api/usuarios` · `GET` · `PUT` · `DELETE /api/usuarios/{id}` | ADMINISTRADOR |
+| Indicadores | `GET /api/resumen` | ADMINISTRADOR, VENDEDOR |
+
+Los errores se responden en formato ProblemDetail (RFC 9457) con 400, 401, 403, 404 o 422.
+
+### Pruebas con Postman
+
+En `postman/` están la colección (54 peticiones y 110 pruebas automáticas en 5 carpetas: catálogo público, vendedor,
+pedidos, cliente y administrador) y el entorno local. En Postman: **Import** → seleccionar los dos archivos → elegir el
+entorno *Gestión de Pedidos - Local* → clic derecho en la colección → **Run collection**.
 
 Ejemplo con curl:
 
@@ -138,12 +148,12 @@ por el formulario.
 ## Pruebas y estándar de codificación
 
 ```bash
-mvn test                                   # 55 pruebas JUnit 5 (validaciones, servicios, vistas y API)
+mvn test                                   # 61 pruebas JUnit 5 (validaciones, servicios, vistas y API)
 java herramientas/VerificadorEstandar.java # verifica las reglas de docs/estandares-codificacion.md
 ```
 
 ## Control de versiones
 
 Commits con el formato *Conventional Commits* (`feat`, `fix`, `test`, `docs`, `chore`, `style`) y etiquetas
-`v1.0.0` (AA3-EV01) y `v1.1.0` (AA3-EV02).
+`v1.0.0` (AA3-EV01), `v1.1.0` (AA3-EV02) y `v1.2.0` (AA5-EV04, API completa y pruebas con Postman).
 Ver `git log --oneline`.

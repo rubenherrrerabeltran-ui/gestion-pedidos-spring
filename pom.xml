@@ -19,7 +19,7 @@
 
   <groupId>co.sena.adso</groupId>
   <artifactId>gestion-pedidos-spring</artifactId>
-  <version>1.0.0</version>
+  <version>1.2.0</version>
   <name>Gestión de Pedidos - Spring Boot</name>
   <description>Módulo de software del sistema de gestión de pedidos codificado con Spring Boot</description>
 
