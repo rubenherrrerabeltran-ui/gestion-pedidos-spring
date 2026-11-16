@@ -1,12 +1,28 @@
 # Sistema de Gestión de Pedidos — Módulo Spring Boot
 
-Evidencia **GA7-220501096-AA3-EV01** · Codificación de módulos del software (web) aplicando un framework.
+Evidencias **GA7-220501096-AA3-EV01** (codificación con un framework, v1.0.0) y
+**GA7-220501096-AA3-EV02** (módulo codificado y probado según los requerimientos, v1.1.0).
 SENA · Tecnología en Análisis y Desarrollo de Software · Ficha 3186691 · **Rubén Darío Herrera Beltrán**
 
 Este módulo reescribe el sistema de gestión de pedidos (usuarios, productos, pedidos y detalle de pedido)
 con el framework **Spring Boot 4.1.1**. Reutiliza los artefactos de las evidencias anteriores: el modelo
 físico de la base de datos (GA6), las entidades, las reglas de negocio y `ClaveUtil` de AA2-EV01 (JDBC), y el
 diseño de las vistas y los estilos de AA2-EV02 (Servlets y JSP).
+
+## Requerimientos implementados
+
+| Código | Requerimiento (mockups GA6-220501096-AA3-EV02) | Dónde |
+|---|---|---|
+| RF01 | Autenticar con correo y contraseña | `/login`, `POST /api/sesion` |
+| RF02 | Registrar usuarios con datos personales, documento y rol | `/registro` (clientes) y `/usuarios` (administrador) |
+| RF03 | Indicadores, últimos pedidos y alertas de inventario | `/` (tablero) |
+| RF04 | Consultar, buscar, filtrar, registrar y editar productos | `/productos`, `/api/productos` |
+| RF05 | Registrar pedidos con detalle, subtotal, IVA y total | `/pedidos/nuevo`, `POST /api/pedidos` |
+| RF06 | Consultar y filtrar pedidos por cliente, estado y fecha | `/pedidos?cliente=&estado=&desde=&hasta=` |
+| RF07 | Detalle del pedido y cambio de estado | `/pedidos/{id}`, `PATCH /api/pedidos/{id}/estado` |
+| RF08 | Seguimiento de pedidos por el cliente | `/pedidos` con rol CLIENTE |
+| RF09 | Gestionar usuarios y roles | `/usuarios` |
+| RNF01 | Interfaz web y móvil consistente | `estilos.css` (diseño adaptable) |
 
 ## Tecnologías
 
@@ -56,6 +72,9 @@ export DB_USUARIO=root DB_CLAVE=su_clave
 mvn spring-boot:run
 ```
 
+> Si ya tenía la base de la versión 1.0.0, bórrela una vez (`DROP DATABASE sena_gestion_pedidos;`) para que
+> se cree con las columnas nuevas `documento` y `telefono`.
+
 **Sin instalar MySQL** (perfil demo con H2 en memoria):
 
 ```bash
@@ -103,14 +122,28 @@ curl -b cookies.txt -H "Content-Type: application/json" \
      -d '{"nombreProducto":"Té verde x 20","precio":12500,"stock":14}' http://localhost:8080/api/productos
 ```
 
+## Validaciones
+
+Cada dato se valida dos veces: en el navegador (atributos HTML5 `required`, `minlength`, `maxlength`, `pattern`,
+`min`, `max`, `type="date"`) y en el servidor (`util/Validador.java`), porque una petición puede llegar sin pasar
+por el formulario.
+
+| Tipo | Reglas |
+|---|---|
+| Textos y longitudes | Obligatorios, sin espacios sobrantes; nombre 3–100, producto 3–120, correo hasta 150, contraseña 8–64 |
+| Caracteres especiales | Nombres de persona solo con letras, espacios, `'` y `-`; productos sin `< > { } ; " $`; búsquedas con `%` o comillas tratadas como texto |
+| Números | Documento de 6 a 10 dígitos; teléfono de 10 dígitos (3 o 6); precio > 0, ≤ 100 000 000 y 2 decimales; stock 0–100 000; cantidades enteras de 1 a 1 000 y sin superar el stock |
+| Fechas | Formato AAAA-MM-DD con días reales, sin fechas futuras y "desde" ≤ "hasta" |
+
 ## Pruebas y estándar de codificación
 
 ```bash
-mvn test                                   # 35 pruebas JUnit 5 (servicios, vistas y API)
+mvn test                                   # 55 pruebas JUnit 5 (validaciones, servicios, vistas y API)
 java herramientas/VerificadorEstandar.java # verifica las reglas de docs/estandares-codificacion.md
 ```
 
 ## Control de versiones
 
-Commits con el formato *Conventional Commits* (`feat`, `fix`, `test`, `docs`, `chore`) y etiqueta `v1.0.0`.
+Commits con el formato *Conventional Commits* (`feat`, `fix`, `test`, `docs`, `chore`, `style`) y etiquetas
+`v1.0.0` (AA3-EV01) y `v1.1.0` (AA3-EV02).
 Ver `git log --oneline`.
