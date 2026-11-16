@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="verde_sena">#FF39A900</color>
+    <color name="verde_oscuro">#FF2E8700</color>
+    <color name="verde_claro">#FFEAF6E1</color>
+    <color name="azul_sena">#FF00324D</color>
+    <color name="fondo">#FFF4F7F2</color>
+    <color name="blanco">#FFFFFFFF</color>
+    <color name="texto">#FF1F2933</color>
+    <color name="gris">#FF66707A</color>
+    <color name="rojo">#FFA32020</color>
+</resources>

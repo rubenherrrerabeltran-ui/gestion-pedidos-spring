@@ -1,0 +1,81 @@
+<resources>
+    <string name="app_name">Gestión de Pedidos</string>
+    <string name="titulo_login">Iniciar sesión</string>
+    <string name="sena">SENA</string>
+    <string name="subtitulo_login">App móvil del Sistema de Gestión de Pedidos</string>
+    <string name="hint_servidor">Servidor de la API</string>
+    <string name="hint_correo">Correo electrónico</string>
+    <string name="hint_clave">Contraseña</string>
+    <string name="boton_ingresar">Ingresar</string>
+    <string name="ayuda_servidor">En el emulador, http://10.0.2.2:8080 apunta al computador donde corre la API.</string>
+    <string name="usuarios_prueba">Usuarios de prueba: admin@gestionpedidos.local · laura.vendedora@gestionpedidos.local · carlos.cliente@gestionpedidos.local</string>
+    <string name="autor">Rubén Darío Herrera Beltrán · Ficha 3186691</string>
+
+    <string name="saludo">¡Hola, %1$s!</string>
+    <string name="rol_correo">%1$s · %2$s</string>
+    <string name="etiqueta_productos">Productos</string>
+    <string name="etiqueta_stock_bajo">Stock bajo</string>
+    <string name="etiqueta_pendientes">Pendientes</string>
+    <string name="menu_productos">Catálogo de productos</string>
+    <string name="menu_pedidos">Gestionar pedidos</string>
+    <string name="menu_mis_pedidos">Mis pedidos</string>
+    <string name="menu_carrito">Mi carrito (%1$d)</string>
+    <string name="menu_reporte">Reporte de ventas</string>
+    <string name="menu_salir">Cerrar sesión</string>
+
+    <string name="hint_buscar">Buscar producto</string>
+    <string name="boton_buscar">Buscar</string>
+    <string name="sin_productos">No hay productos que coincidan con la búsqueda.</string>
+    <string name="producto_inactivo">Producto inactivo</string>
+    <string name="stock">Disponibles: %1$d</string>
+    <string name="stock_bajo">Stock bajo: %1$d</string>
+    <string name="boton_agregar">Agregar</string>
+    <string name="agregado">%1$s agregado al carrito</string>
+    <string name="sin_stock">No hay más unidades disponibles (stock: %1$d)</string>
+
+    <string name="titulo_carrito">Mi carrito</string>
+    <string name="carrito_vacio">Su carrito está vacío. Agregue productos desde el catálogo.</string>
+    <string name="precio_unitario">%1$s c/u</string>
+    <string name="etiqueta_subtotal">Subtotal</string>
+    <string name="etiqueta_iva" formatted="false">IVA (19 %)</string>
+    <string name="etiqueta_total">Total</string>
+    <string name="boton_confirmar">Confirmar pedido</string>
+    <string name="pedido_creado">Pedido #%1$d registrado</string>
+    <string name="menos">−</string>
+    <string name="mas">+</string>
+
+    <string name="filtrar_estado">Filtrar por estado</string>
+    <string name="todos_los_estados">Todos los estados</string>
+    <string name="sin_pedidos">No hay pedidos con este filtro.</string>
+    <string name="numero_pedido">Pedido #%1$d</string>
+    <string name="fecha_unidades">%1$s · %2$s</string>
+    <string name="etiqueta_cliente">Cliente</string>
+    <string name="etiqueta_fecha">Fecha</string>
+    <string name="etiqueta_estado">Estado</string>
+    <string name="etiqueta_productos_pedido">Productos del pedido</string>
+    <string name="cantidad_por_precio">%1$d × %2$s</string>
+    <string name="acciones">Acciones disponibles</string>
+    <string name="marcar_como">Marcar como %1$s</string>
+    <string name="titulo_confirmar">Confirmar cambio</string>
+    <string name="confirmar_estado">¿Desea marcar el pedido #%1$d como %2$s?</string>
+    <string name="estado_actualizado">Estado actualizado: %1$s</string>
+
+    <string name="hint_desde">Desde (AAAA-MM-DD)</string>
+    <string name="hint_hasta">Hasta (AAAA-MM-DD)</string>
+    <string name="boton_consultar">Consultar</string>
+    <string name="periodo">Del %1$s al %2$s</string>
+    <string name="total_vendido">Total vendido (pagados y enviados)</string>
+    <string name="detalle_ventas">Subtotal %1$s + IVA %2$s</string>
+    <string name="etiqueta_pedidos_periodo">Pedidos</string>
+    <string name="etiqueta_vendidos">Vendidos</string>
+    <string name="etiqueta_ticket">Ticket promedio</string>
+    <string name="estados_reporte">Pendientes: %1$d · Pagados: %2$d · Enviados: %3$d · Cancelados: %4$d</string>
+    <string name="productos_mas_vendidos">Productos más vendidos</string>
+    <string name="sin_ventas">No hubo ventas en el periodo.</string>
+
+    <string name="titulo_error">No se pudo completar</string>
+    <string name="error_inesperado">Ocurrió un error inesperado: %1$s</string>
+    <string name="aceptar">Aceptar</string>
+    <string name="si">Sí</string>
+    <string name="no">No</string>
+</resources>
