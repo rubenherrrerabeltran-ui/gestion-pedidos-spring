@@ -1,7 +1,8 @@
 # Sistema de Gestión de Pedidos — Módulo Spring Boot
 
 Evidencias **GA7-220501096-AA3-EV01** (v1.0.0), **GA7-220501096-AA3-EV02** (v1.1.0), **GA7-220501096-AA5-EV04**
-(v1.2.0, API probada con Postman) y **GA8-220501096-AA1-EV01** (v1.3.0, integración de módulos: reportes).
+(v1.2.0, API probada con Postman), **GA8-220501096-AA1-EV01** (v1.3.0, integración de módulos: reportes) y
+**GA8-220501096-AA2-EV02** (v1.4.0, app móvil Android en [`movil/`](movil/README.md)).
 SENA · Tecnología en Análisis y Desarrollo de Software · Ficha 3186691 · **Rubén Darío Herrera Beltrán**
 
 Este módulo reescribe el sistema de gestión de pedidos (usuarios, productos, pedidos y detalle de pedido)
@@ -165,10 +166,13 @@ Resultado v1.3.0: 85 pruebas, 0 fallos; cobertura de instrucciones 86 % y de ram
 - [`docs/AMBIENTES.md`](docs/AMBIENTES.md): ambientes de desarrollo y pruebas, servidor, base de datos y perfiles.
 - [`docs/diagramas/`](docs/diagramas/): diagramas de paquetes, componentes, clases y mapa de navegación.
 - [`docs/API.md`](docs/API.md) y [`docs/estandares-codificacion.md`](docs/estandares-codificacion.md).
+- [`movil/README.md`](movil/README.md): app Android (Java) que consume esta API: inicio de sesión, catálogo,
+  carrito, pedidos y reporte de ventas; pruebas JUnit y Espresso.
 
 ## Control de versiones
 
 Commits con el formato *Conventional Commits* (`feat`, `fix`, `test`, `docs`, `chore`, `style`) y etiquetas
 `v1.0.0` (AA3-EV01), `v1.1.0` (AA3-EV02), `v1.2.0` (AA5-EV04, API completa y pruebas con Postman) y
-`v1.3.0` (GA8-AA1-EV01, módulo de reportes integrado, pruebas unitarias y cobertura).
+`v1.3.0` (GA8-AA1-EV01, módulo de reportes integrado, pruebas unitarias y cobertura) y `v1.4.0`
+(GA8-AA2-EV02, módulos móviles Android).
 Ver `git log --oneline`.
